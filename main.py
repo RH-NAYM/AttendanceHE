@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+from ipaddress import ip_address, ip_network
 from cryptography.fernet import Fernet
 import os
 import pytz
@@ -17,7 +18,7 @@ SPREADSHEET_NAME = os.getenv("SPREADSHEET_NAME", "AttendanceSystem")
 MASTER_SHEET_NAME = os.getenv("MASTER_SHEET_NAME", "attendance_master")
 EMPLOYEE_SHEET_NAME = os.getenv("EMPLOYEE_SHEET_NAME", "config_employees")
 COMPANY_SHEET_NAME = os.getenv("COMPANY_SHEET_NAME", "config_companies")
-ALLOWED_IPS = None   # allow any origin
+ALLOWED_IPS = None  # allow all IPs
 ENCRYPTED_CLIENT_ID_FILE = "client_id.enc"
 FERNET_KEY = os.getenv("FERNET_KEY", "PeKU3K-rDOo8EeLrMxR3GjCDQgQCLiFP9fbktkHITgE=")
 TIMEZONE = "Asia/Dhaka"  # Bangladesh timezone
@@ -47,7 +48,7 @@ try:
 except Exception as e:
     raise RuntimeError(f"Error opening spreadsheet/workbook: {e}")
 
-# --- Utility functions ---
+# Utility functions
 def get_employees():
     rows = employee_sheet.get_all_records()
     return {
@@ -55,7 +56,7 @@ def get_employees():
             'id': r['ID'],
             'full_name': r['Full Name'],
             'nickname': r['Nickname'],
-            'email': r['E-mail']
+            'office_email': r.get('Office mail', "").strip()
         }
         for r in rows
     }
@@ -75,7 +76,7 @@ def get_all_records():
 def find_record_for_today(email: str, today: str, records: List[dict]):
     """Returns check-in/out record for today if exists"""
     for idx, r in enumerate(records):
-        if r.get("E-mail","").strip().lower() == email.strip().lower() and r.get("Date","") == today:
+        if r.get("E-mail", "").strip().lower() == email.strip().lower() and r.get("Date", "") == today:
             return r, idx + 2  # gspread is 1-indexed including header row
     return None, None
 
@@ -83,7 +84,6 @@ def is_ip_allowed(ip: str):
     if ALLOWED_IPS is None:
         return True  # allow any IP
     try:
-        from ipaddress import ip_address, ip_network
         ip_obj = ip_address(ip)
         for allowed in ALLOWED_IPS:
             if ip_obj in ip_network(allowed, strict=False):
@@ -91,7 +91,7 @@ def is_ip_allowed(ip: str):
         return False
     except ValueError:
         return False
-    
+
 
 class AttendanceIn(BaseModel):
     email: str
@@ -99,7 +99,8 @@ class AttendanceIn(BaseModel):
     companies: Optional[List[str]] = None
     details: Optional[str] = None
 
-# --- API Endpoints ---
+
+# API endpoints
 @app.get("/config/companies")
 def api_get_companies():
     return {"companies": get_companies()}
@@ -112,10 +113,12 @@ def api_get_employees():
             "id": r['ID'],
             "full_name": r['Full Name'],
             "nickname": r['Nickname'],
-            "email": r['E-mail']
+            "email": r['E-mail'],
+            "office_email": r.get('Office mail', "")
         }
         for r in rows
     ]
+
 
 @app.post("/attendance")
 def handle_attendance(payload: AttendanceIn, request: Request):
@@ -138,9 +141,9 @@ def handle_attendance(payload: AttendanceIn, request: Request):
 
     emp = employees[email]
     emp_id = emp['id']
-    office_email = emp['email']
     full_name = emp['full_name']
     nickname = emp['nickname']
+    office_email = emp['office_email']
 
     records = get_all_records()
     existing_record, row_index = find_record_for_today(email, today, records)
@@ -149,20 +152,29 @@ def handle_attendance(payload: AttendanceIn, request: Request):
         if existing_record and existing_record.get("Check In") == "Checked In":
             raise HTTPException(status_code=400, detail="Already checked in today")
 
-        # Row: [ID, Nickname, Full Name, Office Mail, Google Email, Date, Time, Status, Checkout Time, Checkout Status, Companies, Details, IP]
         row = [
-            emp_id,
-            nickname,
-            full_name,
-            office_email,
-            email,
-            today,
-            time_now,
-            "Checked In",
-            "", "", "", "", ip
+            emp_id,           # ID
+            nickname,         # Nickname
+            full_name,        # Full Name
+            email,            # E-mail
+            office_email,     # Office mail
+            today,            # Date
+            time_now,         # Check In Time
+            "Checked In",     # Check In
+            "",               # Check Out Time
+            "",               # Check Out
+            "",               # Company
+            "",               # Details
+            ip,               # Check in IP
+            ""                # Check Out IP
         ]
         master_sheet.append_row(row)
-        return {"status": "checked_in", "time": time_now, "ip": ip}
+        return {
+            "status": "checked_in",
+            "time": time_now,
+            "ip": ip,
+            "office_email": office_email
+        }
 
     elif action == "checkout":
         if not existing_record or existing_record.get("Check In") != "Checked In":
@@ -177,15 +189,25 @@ def handle_attendance(payload: AttendanceIn, request: Request):
                 add_company(c.strip())
 
         companies_str = ",".join(payload.companies)
-        master_sheet.update_cell(row_index, 9, time_now)          # Check Out Time
-        master_sheet.update_cell(row_index, 10, "Checked Out")    # Check Out status
-        master_sheet.update_cell(row_index, 11, companies_str)    # Companies
-        master_sheet.update_cell(row_index, 12, payload.details)  # Details
-        master_sheet.update_cell(row_index, 13, ip)               # IP
-        return {"status": "checked_out", "time": time_now, "ip": ip}
+
+        # Correct column mapping
+        master_sheet.update_cell(row_index, 9, time_now)           # Check Out Time
+        master_sheet.update_cell(row_index, 10, "Checked Out")     # Check Out
+        master_sheet.update_cell(row_index, 11, companies_str)     # Company
+        master_sheet.update_cell(row_index, 12, payload.details)   # Details
+        master_sheet.update_cell(row_index, 14, ip)                # Check Out IP
+
+        return {
+            "status": "checked_out",
+            "time": time_now,
+            "ip": ip,
+            "office_email": office_email
+        }
+
 
     else:
         raise HTTPException(status_code=400, detail="Invalid action")
+
 
 # Serve HTML dynamically with decrypted CLIENT_ID
 @app.get("/")
@@ -195,6 +217,7 @@ def read_index():
         html_content = f.read()
     html_content = html_content.replace("YOUR_CLIENT_ID_HERE", CLIENT_ID)
     return HTMLResponse(html_content)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8080)
