@@ -124,7 +124,7 @@ def handle_attendance(payload: AttendanceIn, request: Request):
     if action == "checkin":
         if existing_record:
             raise HTTPException(status_code=400, detail="Already checked in and pending checkout")
-        row = [emp_id, nickname, full_name, email, today, time_now, "CHECKIN", "", "", "", "", ip]
+        row = [emp_id, nickname, full_name, email, today, time_now, "Checked In", "Pending", "Pending", "Pending", "Pending", ip, "Pending"]
         master_sheet.append_row(row)
         return {"status": "checked_in", "time": time_now, "ip": ip}
 
@@ -140,7 +140,7 @@ def handle_attendance(payload: AttendanceIn, request: Request):
 
         companies_str = ",".join(payload.companies)
         master_sheet.update_cell(row_index, 8, time_now)
-        master_sheet.update_cell(row_index, 9, "CHECKOUT")
+        master_sheet.update_cell(row_index, 9, "Checked Out")
         master_sheet.update_cell(row_index, 10, companies_str)
         master_sheet.update_cell(row_index, 11, payload.details)
         master_sheet.update_cell(row_index, 13, ip)

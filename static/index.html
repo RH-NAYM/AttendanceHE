@@ -23,6 +23,7 @@ button:hover{background:#155db2; transform: translateY(-2px);}
 #googleSignInBtn {margin-top: 20px; width: 100%; background: #4285F4; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:500;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -66,7 +67,6 @@ button:hover{background:#155db2; transform: translateY(-2px);}
 <div id="toast" class="toast"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 <script>
 const apiBase=""; // backend URL if needed
 let userEmail = "";
@@ -176,14 +176,11 @@ document.getElementById("attForm").addEventListener("submit", async e=>{
         }
         showToast("Attendance submitted successfully!");
 
-        // Reset form after successful submission
-        document.getElementById("action").value = "";
+        // Reset everything after submission
+        document.getElementById("attForm").reset();
         document.getElementById("checkoutFields").classList.add("hidden");
-        document.getElementById("companies").innerHTML = "";
-        document.getElementById("company_other").value = "";
-        document.getElementById("details").value = "";
-
-        loadCompanies(); // refresh company list
+        document.getElementById("company_other_container").style.display = "none";
+        loadCompanies();
     }catch(err){
         showToast("Error: "+err.message, false);
     }
