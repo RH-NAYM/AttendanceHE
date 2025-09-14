@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+gspread
+oauth2client
+python-dotenv
+email-validator
+cryptography
+encode

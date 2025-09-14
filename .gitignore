@@ -1,0 +1,97 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+__pycache__
+*.py[cod]
+*$py.class
+*.pytest_cache
+*.pyc
+
+# JPEG / JPG
+*.jpg
+*.jpeg
+testing/*.jpg
+testing/*.jpeg
+
+# PNG
+*.png
+testing/*.png
+
+# GIF
+*.gif
+testing/*.gif
+
+# BMP
+*.bmp
+testing/*.bmp
+
+# TIFF
+*.tif
+*.tiff
+testing/*.tif
+testing/*.tiff
+
+# WebP
+*.webp
+testing/*.webp
+
+# HEIF / HEIC
+*.heif
+*.heic
+testing/*.heif
+testing/*.heic
+
+# RAW formats (common camera formats)
+*.cr2
+*.nef
+*.arw
+testing/*.cr2
+testing/*.nef
+testing/*.arw
+
+# ICO (icon files)
+*.ico
+testing/*.ico
+
+
+# Virtual environment
+venv/
+env/
+
+# Logs and debug files
+*.log
+# logs/
+
+# Environment variables
+.env
+*.env
+
+# IDE/editor files
+.idea/
+.vscode/
+*.sublime-workspace
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Pytest cache
+.pytest_cache/
+
+# MyPy cache
+.mypy_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+*.cover
+
+# Compiled Cython files
+*.so
+
+# MacOS system files
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+# Node.js dependencies (if using frontend assets)
+node_modules/

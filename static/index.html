@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Attendance System</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body { font-family:'Roboto',sans-serif; background:#f0f2f5; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0;}
+.container {background:#fff; padding:40px 30px; border-radius:12px; box-shadow:0 8px 25px rgba(0,0,0,0.15); width:100%; max-width:500px;}
+h2 {text-align:center; color:#1877f2; margin-bottom:30px;}
+label {display:block; margin-top:15px; font-weight:500; color:#333;}
+input, select, textarea {width:100%; padding:10px 12px; margin-top:5px; border:1px solid #ccd0d5; border-radius:8px; font-size:14px; transition:border-color 0.2s, box-shadow 0.2s;}
+input:focus, select:focus, textarea:focus {border-color:#1877f2; box-shadow:0 0 0 2px rgba(24,119,242,0.2); outline:none;}
+select[multiple]{height:120px;}
+button {width:100%; background:#1877f2; color:#fff; font-weight:500; border:none; padding:12px; border-radius:8px; cursor:pointer; margin-top:25px; font-size:16px; transition:background 0.2s, transform 0.2s;}
+button:hover{background:#155db2; transform: translateY(-2px);}
+#checkoutFields.hidden {display:none;}
+#company_other_container{display:none; margin-top:10px;}
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #4BB543; color: #fff; padding: 14px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity:0; pointer-events:none; transition: opacity 0.3s ease, transform 0.3s ease;}
+.toast.show {opacity:1; transform: translateX(-50%) translateY(-10px);}
+.multiselect-container {border:1px solid #ccd0d5; border-radius:8px; max-height:120px; overflow-y:auto;}
+.multiselect-container option {padding:6px;}
+#googleSignInBtn {margin-top: 20px; width: 100%; background: #4285F4; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:500;}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div class="container">
+<h2>Attendance</h2>
+
+<button id="googleSignInBtn">Sign in with Google</button>
+
+<form id="attForm" class="hidden">
+<label>Email (auto from Google)</label>
+<input type="email" name="email" id="email" readonly />
+
+<label>Full Name</label>
+<input type="text" id="full_name" readonly />
+
+<label>Nickname</label>
+<input type="text" id="nickname" readonly />
+
+<label>Action</label>
+<select id="action" name="action" required>
+<option value="">-- select --</option>
+<option value="checkin">Check In</option>
+<option value="checkout">Check Out</option>
+</select>
+
+<div id="checkoutFields" class="hidden">
+<label>Company (select one or more)</label>
+<select id="companies" multiple class="multiselect-container"></select>
+
+<div id="company_other_container">
+<label>Add new company:</label>
+<input type="text" id="company_other" placeholder="Enter company name" />
+</div>
+
+<label>Details (required for checkout)</label>
+<textarea id="details" rows="4" placeholder="Enter details..."></textarea>
+</div>
+
+<button type="submit">Submit</button>
+</form>
+
+<div id="toast" class="toast"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+<script>
+const apiBase=""; // backend URL if needed
+let userEmail = "";
+
+// Toast notification
+function showToast(message, success=true){
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.style.background = success ? "#4BB543" : "#E74C3C";
+    toast.classList.add("show");
+    setTimeout(()=>{toast.classList.remove("show");}, 3000);
+}
+
+// Google Sign-In
+function handleCredentialResponse(response) {
+    const data = jwt_decode(response.credential);
+    userEmail = data.email;
+
+    document.getElementById("email").value = userEmail;
+    document.getElementById("attForm").classList.remove("hidden");
+    document.getElementById("googleSignInBtn").style.display = "none";
+
+    loadEmployeeInfo(userEmail);
+    loadCompanies();
+}
+
+window.onload = function(){
+    google.accounts.id.initialize({
+        client_id: "YOUR_CLIENT_ID_HERE",
+        callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+        document.getElementById("googleSignInBtn"),
+        { theme: "outline", size: "large", width: "100%" }
+    );
+    google.accounts.id.prompt();
+};
+
+// Fetch employee info
+async function loadEmployeeInfo(email){
+    try{
+        const res = await fetch(apiBase + "/config/employees");
+        const data = await res.json();
+        const emp = data.find(e=>e.email.toLowerCase()===email.toLowerCase());
+        if(emp){
+            document.getElementById("full_name").value = emp.full_name;
+            document.getElementById("nickname").value = emp.nickname;
+        } else {
+            showToast("Error: Email not registered", false);
+        }
+    } catch(err){console.warn(err);}
+}
+
+// Load companies
+async function loadCompanies(){
+    try{
+        const res = await fetch(apiBase + "/config/companies");
+        const json = await res.json();
+        const sel = document.getElementById("companies");
+        sel.innerHTML = "";
+        json.companies.forEach(c=>{
+            const opt = document.createElement("option");
+            opt.value = c; opt.text = c;
+            sel.appendChild(opt);
+        });
+        const otherOpt = document.createElement("option"); otherOpt.value="Other"; otherOpt.text="Other";
+        sel.appendChild(otherOpt);
+    }catch(err){console.warn(err);}
+}
+
+// Show/hide checkout fields
+document.getElementById("action").addEventListener("change", e=>{
+    document.getElementById("checkoutFields").className = e.target.value==="checkout"?"":"hidden";
+});
+
+// Show/hide company_other input
+document.getElementById("companies").addEventListener("change", ()=>{
+    const selected = Array.from(document.getElementById("companies").selectedOptions).map(o=>o.value);
+    document.getElementById("company_other_container").style.display = selected.includes("Other")?"block":"none";
+});
+
+// Submit attendance
+document.getElementById("attForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const action = document.getElementById("action").value;
+    const payload = { email: userEmail, action };
+
+    if(action==="checkout"){
+        const companiesSel = Array.from(document.getElementById("companies").selectedOptions).map(o=>o.value);
+        const other = document.getElementById("company_other").value.trim();
+        if(other) companiesSel.push(other);
+        const details = document.getElementById("details").value.trim();
+        payload.companies = companiesSel;
+        payload.details = details;
+    }
+
+    try{
+        const res = await fetch(apiBase+"/attendance", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(!res.ok){
+            showToast("Error: "+(data.detail || JSON.stringify(data)), false);
+            return;
+        }
+        showToast("Attendance submitted successfully!");
+
+        // Reset form after successful submission
+        document.getElementById("action").value = "";
+        document.getElementById("checkoutFields").classList.add("hidden");
+        document.getElementById("companies").innerHTML = "";
+        document.getElementById("company_other").value = "";
+        document.getElementById("details").value = "";
+
+        loadCompanies(); // refresh company list
+    }catch(err){
+        showToast("Error: "+err.message, false);
+    }
+});
+</script>
+</body>
+</html>
