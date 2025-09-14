@@ -1,4 +1,4 @@
-📊 Attendance Hybrid System ==>> main Branch
+📊 Attendance Hybrid System ==>> dev Branch
 https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 https://img.shields.io/badge/Google%2520Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white
 https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white
