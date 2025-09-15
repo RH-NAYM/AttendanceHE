@@ -20,7 +20,7 @@ body {
     border-radius:12px;
     box-shadow:0 8px 25px rgba(0,0,0,0.15);
     width:100%;
-    max-width:500px;
+    max-width:600px;
 }
 h2 {
     text-align:center;
@@ -59,14 +59,33 @@ button {
     margin-top:25px;
     font-size:16px;
     transition:background 0.2s, transform 0.2s;
+    position: relative;
 }
 button:hover {
     background:#155db2;
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.02);
 }
-#checkoutFields.hidden {display:none;}
-#task_for_other_container{display:none; margin-top:10px;}
-#task_fields{display:none; margin-top:10px;}
+button:disabled {
+    opacity:0.6;
+    cursor:not-allowed;
+}
+button .spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+}
+
+.hidden {display:none;}
 .toast {
     position: fixed;
     bottom: 30px;
@@ -82,7 +101,29 @@ button:hover {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .toast.show {opacity:1; transform: translateX(-50%) translateY(-10px);}
-.hidden {display:none;}
+.task-block {
+    border: 1px solid #ccd0d5;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+    position: relative;
+}
+.remove-task {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #E74C3C;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-weight: bold;
+    line-height: 26px;
+    text-align: center;
+    font-size: 16px;
+}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
@@ -121,26 +162,8 @@ button:hover {
 </select>
 
 <div id="checkoutFields" class="hidden">
-<label>Task For</label>
-<select id="task_for">
-<option value="">-- select --</option>
-</select>
-
-<div id="task_for_other_container">
-<label>Add new Task For:</label>
-<input type="text" id="task_for_other" placeholder="Enter task for" />
-</div>
-
-<div id="task_fields">
-<label>Task Name</label>
-<input type="text" id="task_name" placeholder="Enter task name" />
-
-<label>Task Details</label>
-<textarea id="task_details" rows="4" placeholder="Enter task details"></textarea>
-
-<label>My Role to Complete Task</label>
-<textarea id="my_role" rows="2" placeholder="Enter your role"></textarea>
-</div>
+    <div id="tasks_container"></div>
+    <button type="button" id="addTaskBtn" style="margin-top:10px;">Add Task</button>
 </div>
 
 <button type="submit">Submit</button>
@@ -187,7 +210,6 @@ function handleCredentialResponse(response){
 
     document.getElementById("time_now").value = getBDTime();
     loadEmployeeInfo(userEmail);
-    loadTaskFor();
 }
 
 window.onload = function(){
@@ -224,61 +246,134 @@ async function loadEmployeeInfo(email){
     } catch(err){console.warn(err);}
 }
 
-// Task For
-async function loadTaskFor(){
-    try{
-        const res = await fetch(apiBase+"/config/companies");
-        const data = await res.json();
-        const sel = document.getElementById("task_for");
-        sel.innerHTML = `<option value="">-- select --</option>`;
-        data.companies.forEach(c=>{
-            const opt = document.createElement("option");
-            opt.value = c;
-            opt.text = c;
-            sel.appendChild(opt);
-        });
-        const otherOpt = document.createElement("option");
-        otherOpt.value = "Other";
-        otherOpt.text = "Other";
-        sel.appendChild(otherOpt);
-    } catch(err){console.warn(err);}
+// Task block template
+async function createTaskBlock(){
+    const res = await fetch(apiBase+"/config/companies");
+    const data = await res.json();
+    const container = document.getElementById("tasks_container");
+
+    const taskDiv = document.createElement("div");
+    taskDiv.className = "task-block";
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "remove-task";
+    removeBtn.innerText = "×";
+    removeBtn.onclick = ()=>taskDiv.remove();
+    taskDiv.appendChild(removeBtn);
+
+    // Task For
+    const taskForLabel = document.createElement("label");
+    taskForLabel.innerText = "Task For";
+    taskDiv.appendChild(taskForLabel);
+
+    const taskForSel = document.createElement("select");
+    taskForSel.innerHTML = `<option value="">-- select --</option>`;
+    data.companies.forEach(c=>{
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.text = c;
+        taskForSel.appendChild(opt);
+    });
+    const otherOpt = document.createElement("option");
+    otherOpt.value = "Other";
+    otherOpt.text = "Other";
+    taskForSel.appendChild(otherOpt);
+    taskDiv.appendChild(taskForSel);
+
+    const taskForOther = document.createElement("input");
+    taskForOther.type = "text";
+    taskForOther.placeholder = "Enter task for";
+    taskForOther.style.display = "none";
+    taskForOther.style.marginTop = "5px";
+    taskDiv.appendChild(taskForOther);
+
+    taskForSel.addEventListener("change", ()=>{
+        taskForOther.style.display = taskForSel.value === "Other" ? "block" : "none";
+    });
+
+    // Task Name
+    const taskNameLabel = document.createElement("label");
+    taskNameLabel.innerText = "Task Name *";
+    taskDiv.appendChild(taskNameLabel);
+    const taskNameInput = document.createElement("input");
+    taskNameInput.type = "text";
+    taskNameInput.placeholder = "Enter task name";
+    taskDiv.appendChild(taskNameInput);
+
+    // Task Details
+    const taskDetailsLabel = document.createElement("label");
+    taskDetailsLabel.innerText = "Task Details *";
+    taskDiv.appendChild(taskDetailsLabel);
+    const taskDetailsInput = document.createElement("textarea");
+    taskDetailsInput.rows = 3;
+    taskDetailsInput.placeholder = "Enter task details";
+    taskDiv.appendChild(taskDetailsInput);
+
+    // My Role
+    const myRoleLabel = document.createElement("label");
+    myRoleLabel.innerText = "My Role to Complete Task *";
+    taskDiv.appendChild(myRoleLabel);
+    const myRoleInput = document.createElement("textarea");
+    myRoleInput.rows = 2;
+    myRoleInput.placeholder = "Enter your role";
+    taskDiv.appendChild(myRoleInput);
+
+    container.appendChild(taskDiv);
 }
+
+// Add first task initially
+document.getElementById("addTaskBtn").addEventListener("click", createTaskBlock);
 
 // Show/hide checkout fields
 document.getElementById("action").addEventListener("change", e=>{
-    document.getElementById("checkoutFields").className = e.target.value==="checkout"?"":"hidden";
+    if(e.target.value==="checkout"){
+        document.getElementById("checkoutFields").classList.remove("hidden");
+        if(document.getElementById("tasks_container").children.length === 0){
+            createTaskBlock();
+        }
+    } else {
+        document.getElementById("checkoutFields").classList.add("hidden");
+        document.getElementById("tasks_container").innerHTML = "";
+    }
 });
 
-// Show/hide Task For Other input & Task fields
-document.getElementById("task_for").addEventListener("change", ()=>{
-    const val = document.getElementById("task_for").value.trim();
-    document.getElementById("task_for_other_container").style.display = val==="Other"?"block":"none";
-    document.getElementById("task_fields").style.display = val? "block":"none";
-});
-
-// Submit
+// Submit with modern spinner and mandatory validation
 document.getElementById("attForm").addEventListener("submit", async e=>{
     e.preventDefault();
+    const submitBtn = e.target.querySelector("button[type='submit']");
+    submitBtn.disabled = true;
+    const originalText = submitBtn.innerText;
+    submitBtn.innerHTML = 'Submitting <span class="spinner"></span>';
+
     const action = document.getElementById("action").value.trim();
     const payload = { email: userEmail, action };
 
     if(action==="checkout"){
-        let task_for_val = document.getElementById("task_for").value.trim();
-        if(task_for_val === "Other") task_for_val = document.getElementById("task_for_other").value.trim();
-
-        const task_name = document.getElementById("task_name").value.trim();
-        const task_details = document.getElementById("task_details").value.trim();
-        const my_role = document.getElementById("my_role").value.trim();
-
-        if(!task_for_val || !task_name || !task_details || !my_role){
-            showToast("All task fields are required", false);
+        const taskBlocks = document.querySelectorAll(".task-block");
+        if(taskBlocks.length===0){
+            showToast("Please add at least one task", false);
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
             return;
         }
+        const tasks = [];
+        for(const block of taskBlocks){
+            let task_for = block.querySelector("select").value.trim();
+            if(task_for === "Other") task_for = block.querySelector("input").value.trim();
+            const task_name = block.querySelectorAll("input,textarea")[1].value.trim();
+            const task_details = block.querySelectorAll("input,textarea")[2].value.trim();
+            const my_role = block.querySelectorAll("input,textarea")[3].value.trim();
 
-        payload.task_for = task_for_val;
-        payload.task_name = task_name;
-        payload.task_details = task_details;
-        payload.my_role = my_role;
+            if(!task_for || !task_name || !task_details || !my_role){
+                showToast("All fields (*) are mandatory for each task", false);
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+                return;
+            }
+            tasks.push({task_for, task_name, task_details, my_role});
+        }
+        payload.tasks = tasks;
     }
 
     try{
@@ -290,18 +385,22 @@ document.getElementById("attForm").addEventListener("submit", async e=>{
         const data = await res.json();
         if(!res.ok){
             showToast("Error: "+(data.detail || JSON.stringify(data)), false);
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
             return;
         }
         showToast("Attendance submitted successfully!");
         document.getElementById("attForm").reset();
         document.getElementById("attForm").classList.add("hidden");
         document.getElementById("checkoutFields").classList.add("hidden");
-        document.getElementById("task_for_other_container").style.display="none";
-        document.getElementById("task_fields").style.display="none";
+        document.getElementById("tasks_container").innerHTML = "";
         document.getElementById("googleSignInBtn").style.display="block";
         userEmail="";
     }catch(err){
         showToast("Error: "+err.message, false);
+    }finally{
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalText;
     }
 });
 </script>
