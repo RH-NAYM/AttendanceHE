@@ -64,7 +64,7 @@ button:hover {
     background:#155db2;
     transform: translateY(-2px);
 }
-#checkoutFields.hidden {display:none;}
+.hidden {display:none;}
 #task_for_other_container{display:none; margin-top:10px;}
 #task_fields{display:none; margin-top:10px;}
 .toast {
@@ -82,7 +82,6 @@ button:hover {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .toast.show {opacity:1; transform: translateX(-50%) translateY(-10px);}
-.hidden {display:none;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
@@ -121,26 +120,26 @@ button:hover {
 </select>
 
 <div id="checkoutFields" class="hidden">
-<label>Task For</label>
-<select id="task_for">
-<option value="">-- select --</option>
-</select>
+    <label>Task For</label>
+    <select id="task_for">
+        <option value="">-- select --</option>
+    </select>
 
-<div id="task_for_other_container">
-<label>Add new Task For:</label>
-<input type="text" id="task_for_other" placeholder="Enter task for" />
-</div>
+    <div id="task_for_other_container">
+        <label>Add new Task For:</label>
+        <input type="text" id="task_for_other" placeholder="Enter task for" />
+    </div>
 
-<div id="task_fields">
-<label>Task Name</label>
-<input type="text" id="task_name" placeholder="Enter task name" />
+    <div id="task_fields">
+        <label>Task Name</label>
+        <input type="text" id="task_name" placeholder="Enter task name" />
 
-<label>Task Details</label>
-<textarea id="task_details" rows="4" placeholder="Enter task details"></textarea>
+        <label>Task Details</label>
+        <textarea id="task_details" rows="4" placeholder="Enter task details"></textarea>
 
-<label>My Role to Complete Task</label>
-<textarea id="my_role" rows="2" placeholder="Enter your role"></textarea>
-</div>
+        <label>My Role to Complete Task</label>
+        <textarea id="my_role" rows="2" placeholder="Enter your role"></textarea>
+    </div>
 </div>
 
 <button type="submit">Submit</button>
@@ -246,7 +245,11 @@ async function loadTaskFor(){
 
 // Show/hide checkout fields
 document.getElementById("action").addEventListener("change", e=>{
-    document.getElementById("checkoutFields").className = e.target.value==="checkout"?"":"hidden";
+    if(e.target.value==="checkout"){
+        document.getElementById("checkoutFields").classList.remove("hidden");
+    } else {
+        document.getElementById("checkoutFields").classList.add("hidden");
+    }
 });
 
 // Show/hide Task For Other input & Task fields
