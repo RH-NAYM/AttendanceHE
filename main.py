@@ -54,7 +54,6 @@ except Exception as e:
 
 # Utility functions
 def get_employees():
-    """Fetch employees as dict keyed by email"""
     try:
         rows = employee_sheet.get_all_records()
     except Exception as e:
@@ -94,10 +93,9 @@ def get_all_records():
         raise HTTPException(status_code=500, detail=f"Failed to fetch master records: {e}")
 
 def find_record_for_today(email: str, today: str, records: List[dict]):
-    """Find today's check-in/out record for email"""
     for idx, r in enumerate(records):
         if str(r.get("E-mail", "")).strip().lower() == email and str(r.get("Date", "")).strip() == today:
-            return r, idx + 2  # +2 for header and 1-based index
+            return r, idx + 2
     return None, None
 
 def is_ip_allowed(ip: str):
@@ -112,14 +110,17 @@ def is_ip_allowed(ip: str):
         return False
     return False
 
-# Pydantic model
+# Pydantic models
+class TaskItem(BaseModel):
+    task_for: str
+    task_name: str
+    task_details: str
+    my_role: str
+
 class AttendanceIn(BaseModel):
     email: str
     action: str
-    task_for: Optional[str] = None
-    task_name: Optional[str] = None
-    task_details: Optional[str] = None
-    my_role: Optional[str] = None
+    tasks: List[TaskItem] = []
 
 # API endpoints
 @app.get("/config/companies")
@@ -145,6 +146,8 @@ def api_get_employees():
 
 @app.post("/attendance")
 def handle_attendance(payload: AttendanceIn, request: Request):
+    print(payload)
+    print(request)
     ip = request.client.host
     if not is_ip_allowed(ip):
         raise HTTPException(status_code=403, detail=f"Access denied for IP: {ip}")
@@ -173,7 +176,6 @@ def handle_attendance(payload: AttendanceIn, request: Request):
     if action == "checkin":
         if existing_record and existing_record.get("Check In") == "Checked In":
             raise HTTPException(status_code=400, detail="Already checked in today")
-
         row = [
             emp_id, nickname, full_name, email, office_email,
             today, time_now, "Checked In", "", "", ip, "", "", "", "", ""
@@ -182,33 +184,36 @@ def handle_attendance(payload: AttendanceIn, request: Request):
             master_sheet.append_row(row)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to append check-in: {e}")
-
         return {"status": "checked_in", "time": time_now, "ip": ip, "office_email": office_email}
 
     elif action == "checkout":
         if not existing_record or existing_record.get("Check In") != "Checked In":
             raise HTTPException(status_code=400, detail="Check-in required before checkout")
-        if existing_record.get("Check Out") == "Checked Out":
-            raise HTTPException(status_code=400, detail="Already checked out today")
-
-        task_for = (payload.task_for or "").strip()
-        task_name = (payload.task_name or "").strip()
-        task_details = (payload.task_details or "").strip()
-        my_role = (payload.my_role or "").strip()
-
-        if not all([task_for, task_name, task_details, my_role]):
-            raise HTTPException(status_code=400, detail="Task For, Task Name, Task Details, and My Role are required for checkout")
-
-        add_company(task_for)
+        if not payload.tasks or len(payload.tasks) == 0:
+            raise HTTPException(status_code=400, detail="At least one task is required for checkout")
 
         try:
-            master_sheet.update_cell(row_index, 9, time_now)       # Time Out
+            # update original check-in row with first task
+            first_task = payload.tasks[0]
+            add_company(first_task.task_for)
+            master_sheet.update_cell(row_index, 9, time_now)        # Time Out
             master_sheet.update_cell(row_index, 10, "Checked Out")
-            master_sheet.update_cell(row_index, 12, ip)            # IP
-            master_sheet.update_cell(row_index, 13, task_for)
-            master_sheet.update_cell(row_index, 14, task_name)
-            master_sheet.update_cell(row_index, 15, task_details)
-            master_sheet.update_cell(row_index, 16, my_role)
+            master_sheet.update_cell(row_index, 12, ip)
+            master_sheet.update_cell(row_index, 13, first_task.task_for)
+            master_sheet.update_cell(row_index, 14, first_task.task_name)
+            master_sheet.update_cell(row_index, 15, first_task.task_details)
+            master_sheet.update_cell(row_index, 16, first_task.my_role)
+
+            # append additional tasks as new rows
+            for task in payload.tasks[1:]:
+                add_company(task.task_for)
+                row = [
+                    emp_id, nickname, full_name, email, office_email,
+                    today, time_now, "Checked In", time_now, "Checked Out", ip,
+                    task.task_for, task.task_name, task.task_details, task.my_role
+                ]
+                master_sheet.append_row(row)
+
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to update checkout: {e}")
 
