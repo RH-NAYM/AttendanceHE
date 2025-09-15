@@ -65,7 +65,8 @@ button:hover {
     transform: translateY(-2px);
 }
 #checkoutFields.hidden {display:none;}
-#company_other_container{display:none; margin-top:10px;}
+#task_for_other_container{display:none; margin-top:10px;}
+#task_fields{display:none; margin-top:10px;}
 .toast {
     position: fixed;
     bottom: 30px;
@@ -81,47 +82,6 @@ button:hover {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .toast.show {opacity:1; transform: translateX(-50%) translateY(-10px);}
-.checkbox-container {
-    border:1px solid #ccd0d5;
-    border-radius:12px;
-    max-height:180px;
-    overflow-y:auto;
-    padding:10px;
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
-    gap:10px;
-    background:#f9fafb;
-}
-.checkbox-container label {
-    display:flex;
-    align-items:center;
-    gap:6px;
-    padding:6px 10px;
-    border-radius:8px;
-    background:#fff;
-    border:1px solid #e1e4e8;
-    cursor:pointer;
-    font-size:14px;
-    transition:all 0.2s ease;
-}
-.checkbox-container label:hover {
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
-    border-color:#1877f2;
-}
-.checkbox-container input[type="checkbox"] {
-    accent-color:#1877f2;
-}
-#googleSignInBtn {
-    margin-top: 20px;
-    width: 100%;
-    background: #4285F4;
-    color:#fff;
-    border:none;
-    padding:12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:500;
-}
 .hidden {display:none;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -161,16 +121,26 @@ button:hover {
 </select>
 
 <div id="checkoutFields" class="hidden">
-<label>Company (select one or more)</label>
-<div id="companies_container" class="checkbox-container"></div>
+<label>Task For</label>
+<select id="task_for">
+<option value="">-- select --</option>
+</select>
 
-<div id="company_other_container">
-<label>Add new company:</label>
-<input type="text" id="company_other" placeholder="Enter company name" />
+<div id="task_for_other_container">
+<label>Add new Task For:</label>
+<input type="text" id="task_for_other" placeholder="Enter task for" />
 </div>
 
-<label>Details (required for checkout)</label>
-<textarea id="details" rows="4" placeholder="Enter details..."></textarea>
+<div id="task_fields">
+<label>Task Name</label>
+<input type="text" id="task_name" placeholder="Enter task name" />
+
+<label>Task Details</label>
+<textarea id="task_details" rows="4" placeholder="Enter task details"></textarea>
+
+<label>My Role to Complete Task</label>
+<textarea id="my_role" rows="2" placeholder="Enter your role"></textarea>
+</div>
 </div>
 
 <button type="submit">Submit</button>
@@ -180,10 +150,10 @@ button:hover {
 </div>
 
 <script>
-const apiBase=""; // backend URL if needed
+const apiBase=""; // backend URL
 let userEmail = "";
 
-// Toast notification
+// Toast
 function showToast(message, success=true){
     const toast = document.getElementById("toast");
     toast.innerText = message;
@@ -192,22 +162,22 @@ function showToast(message, success=true){
     setTimeout(()=>{toast.classList.remove("show");}, 3000);
 }
 
-// Get Bangladesh time
+// Bangladesh time
 function getBDTime(){
     const now = new Date();
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const bdOffset = 6 * 60 * 60 * 1000;
+    const bdOffset = 6*60*60*1000;
     const bdDate = new Date(utc + bdOffset);
     let hours = bdDate.getHours();
     const minutes = bdDate.getMinutes();
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12 || 12;
-    const minStr = minutes<10 ? '0'+minutes : minutes;
+    const minStr = minutes<10?'0'+minutes:minutes;
     return `${hours}:${minStr} ${ampm}`;
 }
 
 // Google Sign-In
-function handleCredentialResponse(response) {
+function handleCredentialResponse(response){
     const data = jwt_decode(response.credential);
     userEmail = data.email;
 
@@ -217,7 +187,7 @@ function handleCredentialResponse(response) {
 
     document.getElementById("time_now").value = getBDTime();
     loadEmployeeInfo(userEmail);
-    loadCompanies();
+    loadTaskFor();
 }
 
 window.onload = function(){
@@ -237,41 +207,41 @@ setInterval(()=>{
         document.getElementById("time_now").value = getBDTime();
 }, 60000);
 
-// Load employee info
+// Employee info
 async function loadEmployeeInfo(email){
     try{
-        const res = await fetch(apiBase + "/config/employees");
+        const res = await fetch(apiBase+"/config/employees");
         const data = await res.json();
         const emp = data.find(e=>e.email.toLowerCase()===email.toLowerCase());
         if(emp){
             document.getElementById("emp_id").value = emp.id;
-            document.getElementById("office_email").value = emp.email;
+            document.getElementById("office_email").value = emp.office_email;
             document.getElementById("full_name").value = emp.full_name;
             document.getElementById("nickname").value = emp.nickname;
         } else {
-            showToast("Error: Email not registered", false);
+            showToast("Email not registered", false);
         }
     } catch(err){console.warn(err);}
 }
 
-// Load companies
-async function loadCompanies(){
+// Task For
+async function loadTaskFor(){
     try{
-        const res = await fetch(apiBase + "/config/companies");
-        const json = await res.json();
-        const container = document.getElementById("companies_container");
-        container.innerHTML = "";
-
-        json.companies.forEach(c=>{
-            const label = document.createElement("label");
-            label.innerHTML = `<input type="checkbox" value="${c}" class="company_checkbox"><span>${c}</span>`;
-            container.appendChild(label);
+        const res = await fetch(apiBase+"/config/companies");
+        const data = await res.json();
+        const sel = document.getElementById("task_for");
+        sel.innerHTML = `<option value="">-- select --</option>`;
+        data.companies.forEach(c=>{
+            const opt = document.createElement("option");
+            opt.value = c;
+            opt.text = c;
+            sel.appendChild(opt);
         });
-
-        const otherLabel = document.createElement("label");
-        otherLabel.innerHTML = `<input type="checkbox" value="Other" class="company_checkbox" id="company_other_checkbox"><span>Other</span>`;
-        container.appendChild(otherLabel);
-    }catch(err){console.warn(err);}
+        const otherOpt = document.createElement("option");
+        otherOpt.value = "Other";
+        otherOpt.text = "Other";
+        sel.appendChild(otherOpt);
+    } catch(err){console.warn(err);}
 }
 
 // Show/hide checkout fields
@@ -279,34 +249,43 @@ document.getElementById("action").addEventListener("change", e=>{
     document.getElementById("checkoutFields").className = e.target.value==="checkout"?"":"hidden";
 });
 
-// Show/hide company_other input
-document.addEventListener("change", ()=>{
-    const otherCb = document.getElementById("company_other_checkbox");
-    if(otherCb){
-        document.getElementById("company_other_container").style.display = otherCb.checked ? "block" : "none";
-    }
+// Show/hide Task For Other input & Task fields
+document.getElementById("task_for").addEventListener("change", ()=>{
+    const val = document.getElementById("task_for").value.trim();
+    document.getElementById("task_for_other_container").style.display = val==="Other"?"block":"none";
+    document.getElementById("task_fields").style.display = val? "block":"none";
 });
 
-// Submit attendance
+// Submit
 document.getElementById("attForm").addEventListener("submit", async e=>{
     e.preventDefault();
-    const action = document.getElementById("action").value;
+    const action = document.getElementById("action").value.trim();
     const payload = { email: userEmail, action };
 
     if(action==="checkout"){
-        const companies = Array.from(document.querySelectorAll(".company_checkbox:checked")).map(cb=>cb.value);
-        const other = document.getElementById("company_other").value.trim();
-        if(other) companies.push(other);
-        const details = document.getElementById("details").value.trim();
-        payload.companies = companies;
-        payload.details = details;
+        let task_for_val = document.getElementById("task_for").value.trim();
+        if(task_for_val === "Other") task_for_val = document.getElementById("task_for_other").value.trim();
+
+        const task_name = document.getElementById("task_name").value.trim();
+        const task_details = document.getElementById("task_details").value.trim();
+        const my_role = document.getElementById("my_role").value.trim();
+
+        if(!task_for_val || !task_name || !task_details || !my_role){
+            showToast("All task fields are required", false);
+            return;
+        }
+
+        payload.task_for = task_for_val;
+        payload.task_name = task_name;
+        payload.task_details = task_details;
+        payload.my_role = my_role;
     }
 
     try{
         const res = await fetch(apiBase+"/attendance", {
             method:"POST",
             headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(payload)
+            body: JSON.stringify(payload)
         });
         const data = await res.json();
         if(!res.ok){
@@ -314,14 +293,13 @@ document.getElementById("attForm").addEventListener("submit", async e=>{
             return;
         }
         showToast("Attendance submitted successfully!");
-
-        // Reset form
         document.getElementById("attForm").reset();
         document.getElementById("attForm").classList.add("hidden");
         document.getElementById("checkoutFields").classList.add("hidden");
-        document.getElementById("company_other_container").style.display = "none";
-        document.getElementById("googleSignInBtn").style.display = "block";
-        userEmail = "";
+        document.getElementById("task_for_other_container").style.display="none";
+        document.getElementById("task_fields").style.display="none";
+        document.getElementById("googleSignInBtn").style.display="block";
+        userEmail="";
     }catch(err){
         showToast("Error: "+err.message, false);
     }
