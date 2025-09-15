@@ -1,58 +1,3 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Attendance System</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/style.css">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-</head>
-<body>
-<div class="container">
-<h2>HawkEyes Attendance (AI Team)</h2>
-
-<button id="googleSignInBtn">Sign in with Google</button>
-
-<form id="attForm" class="hidden">
-
-<label>Employee ID</label>
-<input type="text" id="emp_id" readonly />
-
-<label>Office Mail</label>
-<input type="email" id="office_email" readonly />
-
-<label>Email (auto from Google)</label>
-<input type="email" name="email" id="email" readonly />
-
-<label>Full Name</label>
-<input type="text" id="full_name" readonly />
-
-<label>Nickname</label>
-<input type="text" id="nickname" readonly />
-
-<label>Time (BD)</label>
-<input type="text" id="time_now" readonly />
-
-<label>Action</label>
-<select id="action" name="action" required>
-<option value="">-- select --</option>
-<option value="checkin">Check In</option>
-<option value="checkout">Check Out</option>
-</select>
-
-<div id="checkoutFields" class="hidden">
-    <div id="tasks_container"></div>
-    <button type="button" id="addTaskBtn" style="margin-top:10px;">Add Task</button>
-</div>
-
-<button type="submit">Submit</button>
-</form>
-
-<div id="toast" class="toast"></div>
-</div>
-
-<script>
 const apiBase=""; // backend URL
 let userEmail = "";
 
@@ -283,6 +228,3 @@ document.getElementById("attForm").addEventListener("submit", async e=>{
         submitBtn.innerText = originalText;
     }
 });
-</script>
-</body>
-</html>

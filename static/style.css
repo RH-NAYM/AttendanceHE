@@ -1,0 +1,121 @@
+body {
+    font-family:'Roboto',sans-serif;
+    background:#f0f2f5;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    margin:0;
+}
+.container {
+    background:#fff;
+    padding:40px 30px;
+    border-radius:12px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+    width:100%;
+    max-width:600px;
+}
+h2 {
+    text-align:center;
+    color:#1877f2;
+    margin-bottom:30px;
+}
+label {
+    display:block;
+    margin-top:15px;
+    font-weight:500;
+    color:#333;
+}
+input, select, textarea {
+    width:100%;
+    padding:10px 12px;
+    margin-top:5px;
+    border:1px solid #ccd0d5;
+    border-radius:8px;
+    font-size:14px;
+    transition:border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+    border-color:#1877f2;
+    box-shadow:0 0 0 2px rgba(24,119,242,0.2);
+    outline:none;
+}
+button {
+    width:100%;
+    background:#1877f2;
+    color:#fff;
+    font-weight:500;
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:25px;
+    font-size:16px;
+    transition:background 0.2s, transform 0.2s;
+    position: relative;
+}
+button:hover {
+    background:#155db2;
+    transform: translateY(-2px) scale(1.02);
+}
+button:disabled {
+    opacity:0.6;
+    cursor:not-allowed;
+}
+button .spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+}
+
+.hidden {display:none;}
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4BB543;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast.show {opacity:1; transform: translateX(-50%) translateY(-10px);}
+.task-block {
+    border: 1px solid #ccd0d5;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+    position: relative;
+}
+.remove-task {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #E74C3C;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
