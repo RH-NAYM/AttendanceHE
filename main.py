@@ -146,8 +146,6 @@ def api_get_employees():
 
 @app.post("/attendance")
 def handle_attendance(payload: AttendanceIn, request: Request):
-    print(payload)
-    print(request)
     ip = request.client.host
     if not is_ip_allowed(ip):
         raise HTTPException(status_code=403, detail=f"Access denied for IP: {ip}")
@@ -193,23 +191,29 @@ def handle_attendance(payload: AttendanceIn, request: Request):
             raise HTTPException(status_code=400, detail="At least one task is required for checkout")
 
         try:
+            # Get the check-in IP from the existing record
+            # The exact column name might need adjustment based on your Google Sheet
+            checkin_ip = existing_record.get("Check in IP", existing_record.get("Check in IP", ""))
+            
             # update original check-in row with first task
             first_task = payload.tasks[0]
             add_company(first_task.task_for)
             master_sheet.update_cell(row_index, 9, time_now)        # Time Out
             master_sheet.update_cell(row_index, 10, "Checked Out")
-            master_sheet.update_cell(row_index, 12, ip)
+            master_sheet.update_cell(row_index, 12, ip)  # Set checkout IP for first task
             master_sheet.update_cell(row_index, 13, first_task.task_for)
             master_sheet.update_cell(row_index, 14, first_task.task_name)
             master_sheet.update_cell(row_index, 15, first_task.task_details)
             master_sheet.update_cell(row_index, 16, first_task.my_role)
 
-            # append additional tasks as new rows
+            # append additional tasks as new rows with both check-in and checkout IPs
             for task in payload.tasks[1:]:
                 add_company(task.task_for)
                 row = [
                     emp_id, nickname, full_name, email, office_email,
-                    today, time_now, "Checked In", time_now, "Checked Out", ip,
+                    today, time_now, "Checked In", time_now, "Checked Out",
+                    checkin_ip,  # Copy check-in IP from the original record
+                    ip,  # Checkout IP
                     task.task_for, task.task_name, task.task_details, task.my_role
                 ]
                 master_sheet.append_row(row)
