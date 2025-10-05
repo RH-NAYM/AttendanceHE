@@ -1,5 +1,19 @@
 {
-  "builds": [
-    { "src": "Dockerfile", "use": "@vercel/docker" }
-  ]
-}
+    "version": 2,
+    "builds": [
+      {
+        "src": "main.py",
+        "use": "@vercel/python",
+        "config": {
+          "maxLambdaSize": "200mb"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/main.py"
+      }
+    ]
+  }
+  
