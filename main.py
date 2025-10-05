@@ -55,9 +55,25 @@ except Exception as e:
 
 
 
-
-def create_service_account_from_env():
+def create_service_account_from_env(output_path="service_account.json"):
     """Create service_account.json from environment variables"""
+
+    # Fetch all required env variables
+    required_vars = [
+        'SERVICE_ACCOUNT_TYPE',
+        'SERVICE_ACCOUNT_PROJECT_ID',
+        'SERVICE_ACCOUNT_PRIVATE_KEY_ID',
+        'SERVICE_ACCOUNT_PRIVATE_KEY',
+        'SERVICE_ACCOUNT_CLIENT_EMAIL',
+        'SERVICE_ACCOUNT_CLIENT_ID',
+        'SERVICE_ACCOUNT_CLIENT_CERT_URL'
+    ]
+
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    if missing_vars:
+        raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+
+    # Build service account dict
     service_account_data = {
         "type": os.getenv('SERVICE_ACCOUNT_TYPE'),
         "project_id": os.getenv('SERVICE_ACCOUNT_PROJECT_ID'),
@@ -67,16 +83,18 @@ def create_service_account_from_env():
         "client_id": os.getenv('SERVICE_ACCOUNT_CLIENT_ID'),
         "auth_uri": os.getenv('SERVICE_ACCOUNT_AUTH_URI', 'https://accounts.google.com/o/oauth2/auth'),
         "token_uri": os.getenv('SERVICE_ACCOUNT_TOKEN_URI', 'https://oauth2.googleapis.com/token'),
-        "auth_provider_x509_cert_url": os.getenv('SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL', 'https://www.googleapis.com/oauth2/v1/certs'),
+        "auth_provider_x509_cert_url": os.getenv(
+            'SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL', 
+            'https://www.googleapis.com/oauth2/v1/certs'
+        ),
         "client_x509_cert_url": os.getenv('SERVICE_ACCOUNT_CLIENT_CERT_URL')
     }
-    
-    with open("service_account.json", "w") as f:
+
+    # Write to file
+    with open(output_path, "w") as f:
         json.dump(service_account_data, f, indent=2)
 
-# Call this function at startup
-create_service_account_from_env()
-
+    print(f"Service account file created at {output_path}")
 # Utility functions
 def get_employees():
     try:
@@ -146,6 +164,9 @@ class AttendanceIn(BaseModel):
     email: str
     action: str
     tasks: List[TaskItem] = []
+    
+    
+
 
 # API endpoints
 @app.get("/config/companies")
@@ -262,7 +283,8 @@ def read_index():
         raise HTTPException(status_code=500, detail="index.html not found")
     return HTMLResponse(html_content.replace("YOUR_CLIENT_ID_HERE", CLIENT_ID))
 
+
 if __name__ == "__main__":
-    host = os.getenv("HOST", "127.0.0.1")
+    host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", "8080"))
     uvicorn.run(app, host=host, port=port)
