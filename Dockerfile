@@ -1,69 +1,32 @@
-# ---- Base Image ----
-FROM python:3.11-slim AS base
-
-# ---- Environment ----
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PIP_NO_CACHE_DIR=1
-ENV PATH="/root/.local/bin:$PATH"
-
-# ---- Working Directory ----
-WORKDIR /app
-
-# ---- System Dependencies ----
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends gcc
-RUN apt-get install -y --no-install-recommends libpq-dev
-RUN apt-get install -y --no-install-recommends libffi-dev
-RUN apt-get install -y --no-install-recommends libssl-dev
-RUN apt-get install -y --no-install-recommends curl
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN apt-get update
-RUN apt-get upgrade -y
-
-# ---- Copy & Install Dependencies ----
-COPY requirements.txt .
-
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install -r requirements.txt
-
-# ---- Copy Application Files ----
-COPY . .
-
-# ---- Pre-run Setup ----
-# If your script creates environment files or credentials before launch
-RUN python create_cred.py || true
-
-# ---- Expose Port ----
-EXPOSE 8080
-
-# ---- Launch Command ----
-# Vercel expects CMD to run the app directly
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
-
-
-
-
-
-
-
+# Use the official lightweight Python image
 FROM python:3.11-slim
 
-WORKDIR /app
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev \
- && rm -rf /var/lib/apt/lists/*
+# Set work directory
+WORKDIR /code
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 COPY requirements.txt .
 COPY create_cred.py .
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
 
-
-COPY . .
 RUN python create_cred.py || true
-EXPOSE 8080
+# Copy project files
+COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Expose the port Uvicorn will run on
+EXPOSE 7860
+
+# Start the application
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
