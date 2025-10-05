@@ -1,23 +1,9 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "Dockerfile",
-      "use": "@vercel/docker",
-      "config": {
-        "maxLambdaSize": "250mb"
-      }
-    }
+    { "src": "Dockerfile", "use": "@vercel/docker" }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ],
-  "env": {
-    "PYTHONUNBUFFERED": "1",
-    "PYTHONDONTWRITEBYTECODE": "1",
-    "PORT": "8080"
-  }
+    { "src": "/(.*)", "dest": "/" }
+  ]
 }
