@@ -11,7 +11,6 @@ from cryptography.fernet import Fernet
 import os
 import pytz
 import uvicorn
-import json
 
 # --- Config ---
 SERVICE_ACCOUNT_FILE = "service_account.json"
@@ -52,30 +51,6 @@ try:
     company_sheet = sh.worksheet(COMPANY_SHEET_NAME)
 except Exception as e:
     raise RuntimeError(f"Error initializing Google Sheets: {e}")
-
-
-
-
-def create_service_account_from_env():
-    """Create service_account.json from environment variables"""
-    service_account_data = {
-        "type": os.getenv('SERVICE_ACCOUNT_TYPE'),
-        "project_id": os.getenv('SERVICE_ACCOUNT_PROJECT_ID'),
-        "private_key_id": os.getenv('SERVICE_ACCOUNT_PRIVATE_KEY_ID'),
-        "private_key": os.getenv('SERVICE_ACCOUNT_PRIVATE_KEY').replace('\\n', '\n'),
-        "client_email": os.getenv('SERVICE_ACCOUNT_CLIENT_EMAIL'),
-        "client_id": os.getenv('SERVICE_ACCOUNT_CLIENT_ID'),
-        "auth_uri": os.getenv('SERVICE_ACCOUNT_AUTH_URI', 'https://accounts.google.com/o/oauth2/auth'),
-        "token_uri": os.getenv('SERVICE_ACCOUNT_TOKEN_URI', 'https://oauth2.googleapis.com/token'),
-        "auth_provider_x509_cert_url": os.getenv('SERVICE_ACCOUNT_AUTH_PROVIDER_CERT_URL', 'https://www.googleapis.com/oauth2/v1/certs'),
-        "client_x509_cert_url": os.getenv('SERVICE_ACCOUNT_CLIENT_CERT_URL')
-    }
-    
-    with open("service_account.json", "w") as f:
-        json.dump(service_account_data, f, indent=2)
-
-# Call this function at startup
-create_service_account_from_env()
 
 # Utility functions
 def get_employees():
