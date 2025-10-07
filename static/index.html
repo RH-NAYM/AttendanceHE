@@ -20,6 +20,78 @@
         <!-- <div class="team-badge"></div> -->
     </div>
 
+    <div style="font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;max-width:900px;margin:32px auto;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);overflow:hidden;border:1px solid #e5e7eb;background:#f9fafb;">
+    <header style="background:linear-gradient(135deg,#0f172a 0%,#0369a1 100%);color:#fff;padding:28px 32px;">
+        <h1 style="margin:0;font-size:22px;letter-spacing:0.3px;">Attendance & Performance Policy</h1>
+        <p style="margin:8px 0 0 0;opacity:0.85;font-size:14px;">Transparent, consistent, and merit-based daily evaluation system (Total: <strong>10 points</strong>)</p>
+    </header>
+
+    <main style="padding:28px;color:#0f172a;background:#fff;">
+        <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;">Attendance Guidelines</h2>
+        <ul style="margin:0 0 24px 20px;line-height:1.55;">
+        <li><strong>Single Check-in:</strong> Only one check-in per day is allowed. Multiple attempts will be rejected automatically.</li>
+        <li><strong>Multiple Tasks:</strong> Employees can add multiple tasks throughout the day after check-in; all contribute to the day's evaluation.</li>
+        <li><strong>Multiple Check-outs:</strong> If more than one check-out is submitted, <strong>the last one is retained</strong>; earlier ones are replaced.</li>
+        <li><strong>Check-in before 10:35 AM:</strong> earns positive points.</li>
+        <li><strong>Check-in after 10:35 AM:</strong> earns negative points.</li>
+        <li><strong>Check-out before 7:00 PM:</strong> negative points.</li>
+        <li><strong>Check-out after 7:00 PM:</strong> positive points.</li>
+        <li><strong>Debug or issue solve in Ops & AI group:</strong> positive points.</li>
+        <li><strong>Missed or delayed timeline:</strong> negative points.</li>
+        <li><strong>Daily work quality:</strong> scored by manager discretion.</li>
+        <li><strong>Innovation / new build:</strong> positive points.</li>
+        </ul>
+
+        <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;">Mark Distribution (Total = <span style="color:#0284c7;">10 Points</span>)</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;">
+        <thead>
+            <tr style="background:#f1f5f9;">
+            <th style="text-align:left;padding:12px 14px;">Category</th>
+            <th style="text-align:right;padding:12px 14px;">Max Points</th>
+            <th style="text-align:left;padding:12px 14px;">Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Punctuality (Check-in before 10:35 AM)</td><td style="text-align:right;padding:10px 14px;">1.5</td><td style="padding:10px 14px;">Consistency & discipline</td></tr>
+            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Work Duration (Check-out after 7:00 PM)</td><td style="text-align:right;padding:10px 14px;">1.5</td><td style="padding:10px 14px;">Commitment to full shift</td></tr>
+            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Task Completion & Quality</td><td style="text-align:right;padding:10px 14px;">2.0</td><td style="padding:10px 14px;">Deliverables and accuracy</td></tr>
+            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Innovation / New Builds</td><td style="text-align:right;padding:10px 14px;">2.0</td><td style="padding:10px 14px;">Original contributions</td></tr>
+            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Debug & Issue Solving (Ops & AI)</td><td style="text-align:right;padding:10px 14px;">2.0</td><td style="padding:10px 14px;">Problem-solving & reliability</td></tr>
+            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Collaboration & Conduct</td><td style="text-align:right;padding:10px 14px;">1.0</td><td style="padding:10px 14px;">Professional behavior & teamwork</td></tr>
+            <tr style="background:#f9fafb;font-weight:600;">
+            <td style="padding:12px 14px;border-top:1px solid #e2e8f0;">Total</td>
+            <td style="text-align:right;padding:12px 14px;">10.0</td>
+            <td style="padding:12px 14px;">Final capped score</td>
+            </tr>
+        </tbody>
+        </table>
+
+        <h2 style="margin:0 0 10px;font-size:17px;font-weight:600;">Penalty & Deductions</h2>
+        <ul style="margin:6px 0 22px 20px;line-height:1.55;">
+        <li>Late Check-in (after 10:35 AM): <span style="color:#b91c1c;">-1.5</span></li>
+        <li>Early Check-out (before 7:00 PM): <span style="color:#b91c1c;">-1.5</span></li>
+        <li>Missed Deadline: <span style="color:#b91c1c;">-2.0</span></li>
+        <li>Repeated Behavioral Offense: <span style="color:#b91c1c;">-2.0</span></li>
+        <li>Consistent Week Performance: <span style="color:#b91c1c;">-1.0</span></li>
+        </ul>
+
+        <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:20px;">
+        <h3 style="margin:0 0 8px;font-size:15px;font-weight:600;">System Behavior Summary</h3>
+        <ul style="margin:0 0 0 18px;line-height:1.55;">
+            <li>Only <strong>one check-in</strong> per day is recorded.</li>
+            <li>Multiple <strong>tasks</strong> may be logged freely under one attendance entry.</li>
+            <li>When multiple check-outs occur, <strong>only the last one</strong> is stored. Earlier entries are replaced automatically.</li>
+            <li>All timestamps and activities are synced with the server clock (UTC+6).</li>
+        </ul>
+        </div>
+
+        <p style="margin:0;font-size:13px;color:#475569;">Prepared by <strong>Rakib</strong></em></p>
+        <p style="margin:0;font-size:13px;color:#475569;">Effective Date: <em>1st October, 2025</em></p>
+    </main>
+    </div>
+
+
+
     <div id="signin-section">
         <button id="googleSignInBtn" class="google-signin-btn">
             <i class="fab fa-google"></i>
