@@ -26,4 +26,6 @@ COPY . .
 EXPOSE 8080
 
 # Start the application
+
+
 CMD ["uvicorn", "app:app", "--host", "127.0.0.1", "--port", "8080"]
