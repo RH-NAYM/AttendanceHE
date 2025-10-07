@@ -1,56 +1,42 @@
-# # Base image
-# FROM python:3.11-slim
+# ---- Base Image ----
+FROM python:3.11-slim AS base
 
-# # Set working directory
-# WORKDIR /app
+# ---- Environment ----
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=1
+ENV PATH="/root/.local/bin:$PATH"
 
-# # Copy only necessary files first for caching
-# COPY requirements.txt .
-
-# # Install system dependencies (adjust if your packages need more)
-# RUN apt-get update && apt-get install -y \
-#     gcc \
-#     libpq-dev \
-#     && rm -rf /var/lib/apt/lists/*
-
-# # Install Python dependencies
-# RUN pip install --no-cache-dir --upgrade pip && \
-#     pip install --no-cache-dir -r requirements.txt
-
-# # Copy the rest of the application
-# COPY . .
-
-# # Expose port for Vercel
-# EXPOSE 8080
-
-# RUN bash ./build.sh
-
-# # Run the app and generate credentials at runtime
-# CMD ["python", "app.py"]
-
-
-
-# Base image
-FROM python:3.11-slim
-
-# Set working directory
+# ---- Working Directory ----
 WORKDIR /app
 
-# Copy only necessary files first for caching
+# ---- System Dependencies ----
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends gcc
+RUN apt-get install -y --no-install-recommends libpq-dev
+RUN apt-get install -y --no-install-recommends libffi-dev
+RUN apt-get install -y --no-install-recommends libssl-dev
+RUN apt-get install -y --no-install-recommends curl
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get upgrade -y
+
+# ---- Copy & Install Dependencies ----
 COPY requirements.txt .
 
-# Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc libpq-dev bash \
-    && pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install -r requirements.txt
 
-# Copy the rest of the application
+# ---- Copy Application Files ----
 COPY . .
 
-# Expose port for Vercel
+# ---- Pre-run Setup ----
+# If your script creates environment files or credentials before launch
+RUN python create_cred.py || true
+
+# ---- Expose Port ----
 EXPOSE 8080
 
-# Run the build script (if it exists) and start FastAPI app
-CMD ["/bin/bash", "-c", "if [ -f ./build.sh ]; then bash ./build.sh; fi && uvicorn app:app --host 0.0.0.0 --port 8080"]
+# ---- Launch Command ----
+# Vercel expects CMD to run the app directly
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
