@@ -11,8 +11,8 @@ from cryptography.fernet import Fernet
 import os
 import pytz
 import json
-import uvicorn
-
+import pytz
+# import uvicorn
 
 def decrypt_service_account():
     """Decrypt encrypted_data.bin into a dict (not a file)."""
@@ -270,7 +270,7 @@ def read_index():
 
 
 
-# if __name__ == "__main__":
-#     host = os.getenv("HOST", "127.0.0.1")
-#     port = int(os.getenv("PORT", "8080"))
-#     uvicorn.run(app, host=host, port=port)
+# # if __name__ == "__main__":
+# #     host = os.getenv("HOST", "127.0.0.1")
+# #     port = int(os.getenv("PORT", "8080"))
+# #     uvicorn.run(app, host=host, port=port)
