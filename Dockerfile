@@ -35,8 +35,7 @@ COPY . .
 # RUN python create_cred.py || true
 
 # ---- Expose Port ----
-EXPOSE 8080
+EXPOSE 7860
 
-# ---- Launch Command ----
-# Vercel expects CMD to run the app directly
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Start the application
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
