@@ -11,6 +11,46 @@ from cryptography.fernet import Fernet
 import os
 import pytz
 import uvicorn
+import json
+
+def decrypt_to_json():
+    # Load the encryption key
+    try:
+        with open("secret.key", "rb") as key_file:
+            key = key_file.read()
+    except FileNotFoundError:
+        print("Error: secret.key file not found!")
+        return False
+    
+    cipher = Fernet(key)
+
+    # Load and decrypt the data
+    try:
+        with open("encrypted_data.bin", "rb") as f:
+            encrypted_data = f.read()
+    except FileNotFoundError:
+        print("Error: encrypted_data.bin file not found!")
+        return False
+
+    try:
+        decrypted_data = cipher.decrypt(encrypted_data)
+        original_dict = json.loads(decrypted_data.decode())
+    except Exception as e:
+        print(f"Decryption error: {e}")
+        return False
+
+    # Save decrypted data to service_account.json
+    try:
+        with open("service_account.json", "w") as json_file:
+            json.dump(original_dict, json_file, indent=2)
+        print("Successfully decrypted and created service_account.json")
+        return True
+    except Exception as e:
+        print(f"Error writing JSON file: {e}")
+        return False
+decrypt_to_json()
+
+
 
 # --- Config ---
 SERVICE_ACCOUNT_FILE = "service_account.json"
@@ -237,7 +277,7 @@ def read_index():
         raise HTTPException(status_code=500, detail="index.html not found")
     return HTMLResponse(html_content.replace("YOUR_CLIENT_ID_HERE", CLIENT_ID))
 
-if __name__ == "__main__":
-    host = os.getenv("HOST", "127.0.0.1")
-    port = int(os.getenv("PORT", "8080"))
-    uvicorn.run(app, host=host, port=port)
+# if __name__ == "__main__":
+#     host = os.getenv("HOST", "127.0.0.1")
+#     port = int(os.getenv("PORT", "8080"))
+#     uvicorn.run(app, host=host, port=port)

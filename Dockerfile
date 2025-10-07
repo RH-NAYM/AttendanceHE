@@ -32,7 +32,7 @@ COPY . .
 
 # ---- Pre-run Setup ----
 # If your script creates environment files or credentials before launch
-RUN python create_cred.py || true
+# RUN python create_cred.py || true
 
 # ---- Expose Port ----
 EXPOSE 8080
