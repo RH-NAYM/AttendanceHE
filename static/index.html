@@ -106,7 +106,11 @@
             <div class="form-grid">
                 <div class="input-group">
                     <label>Employee ID</label>
-                    <input type="text" id="emp_id" readonly />
+                    <input type="number" id="emp_id" readonly />
+                </div>
+                <div class="input-group">
+                    <label>Score</label>
+                    <input type="text" id="score" readonly />
                 </div>
                 <div class="input-group">
                     <label>Office Mail</label>
@@ -238,6 +242,7 @@ async function loadEmployeeInfo(email) {
             document.getElementById("office_email").value = emp.office_email;
             document.getElementById("full_name").value = emp.full_name;
             document.getElementById("nickname").value = emp.nickname;
+            document.getElementById("score").value = emp.score;
         } else {
             showToast("Email not registered in the system", false);
         }
