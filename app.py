@@ -90,7 +90,8 @@ def get_employees():
             "id": r.get("ID", ""),
             "full_name": r.get("Full Name", ""),
             "nickname": r.get("Nickname", ""),
-            "office_email": str(r.get("Office mail", "")).strip()
+            "office_email": str(r.get("Office mail", "")).strip(),
+            "score": int(r.get("Score",0))
         }
         for r in rows
     }
@@ -201,93 +202,11 @@ def api_get_employees():
             "full_name": r.get("Full Name", ""),
             "nickname": r.get("Nickname", ""),
             "email": r.get("E-mail", ""),
-            "office_email": r.get("Office mail", "")
+            "office_email": r.get("Office mail", ""),
+            "score": int(r.get("Score", 0))
         }
         for r in rows
     ]
-
-# # OLD Logic
-# @app.post("/attendance")
-# def handle_attendance(payload: AttendanceIn, request: Request):
-#     ip = request.client.host
-#     if not is_ip_allowed(ip):
-#         raise HTTPException(status_code=403, detail=f"Access denied for IP: {ip}")
-
-#     email = payload.email.strip().lower()
-#     action = payload.action.strip().lower()
-#     employees = get_employees()
-
-#     if email not in employees:
-#         raise HTTPException(status_code=403, detail="Email not registered")
-
-#     tz = pytz.timezone(TIMEZONE)
-#     now = datetime.now(tz)
-#     today = now.strftime("%Y-%m-%d")
-#     time_now = now.strftime("%I:%M:%S %p")
-
-#     emp = employees[email]
-#     emp_id = emp["id"]
-#     full_name = emp["full_name"]
-#     nickname = emp["nickname"]
-#     office_email = emp["office_email"]
-
-#     records = get_all_records()
-#     existing_record, row_index = find_record_for_today(email, today, records)
-
-#     if action == "checkin":
-#         if existing_record and existing_record.get("Check In") == "Checked In":
-#             raise HTTPException(status_code=400, detail="Already checked in today")
-#         row = [
-#             emp_id, nickname, full_name, email, office_email,
-#             today, time_now, "Checked In", "", "", ip, "", "", "", "", ""
-#         ]
-#         try:
-#             master_sheet.append_row(row)
-#         except Exception as e:
-#             raise HTTPException(status_code=500, detail=f"Failed to append check-in: {e}")
-#         return {"status": "checked_in", "time": time_now, "ip": ip, "office_email": office_email}
-
-#     elif action == "checkout":
-#         if not existing_record or existing_record.get("Check In") != "Checked In":
-#             raise HTTPException(status_code=400, detail="Check-in required before checkout")
-#         if not payload.tasks or len(payload.tasks) == 0:
-#             raise HTTPException(status_code=400, detail="At least one task is required for checkout")
-
-#         try:
-#             checkin_ip = existing_record.get("Check in IP", existing_record.get("Check in IP", ""))
-#             first_task = payload.tasks[0]
-#             add_company(first_task.task_for)
-#             master_sheet.update_cell(row_index, 9, time_now)
-#             master_sheet.update_cell(row_index, 10, "Checked Out")
-#             master_sheet.update_cell(row_index, 12, ip)
-#             master_sheet.update_cell(row_index, 13, first_task.task_for)
-#             master_sheet.update_cell(row_index, 14, first_task.task_name)
-#             master_sheet.update_cell(row_index, 15, first_task.task_details)
-#             master_sheet.update_cell(row_index, 16, first_task.my_role)
-
-#             for task in payload.tasks[1:]:
-#                 add_company(task.task_for)
-#                 row = [
-#                     emp_id, nickname, full_name, email, office_email,
-#                     today, time_now, "Checked In", time_now, "Checked Out",
-#                     checkin_ip, ip,
-#                     task.task_for, task.task_name, task.task_details, task.my_role
-#                 ]
-#                 master_sheet.append_row(row)
-
-#         except Exception as e:
-#             raise HTTPException(status_code=500, detail=f"Failed to update checkout: {e}")
-
-#         return {"status": "checked_out", "time": time_now, "ip": ip, "office_email": office_email}
-
-#     else:
-#         raise HTTPException(status_code=400, detail="Invalid action (use 'checkin' or 'checkout')")
-
-
-
-
-
-
 
 
 # NEW Lodic
@@ -314,6 +233,7 @@ def handle_attendance(payload: AttendanceIn, request: Request):
     full_name = emp["full_name"]
     nickname = emp["nickname"]
     office_email = emp["office_email"]
+    score = emp["score"]
 
     records = get_all_records()
     existing_record, row_index = find_record_for_today(email, today, records)
