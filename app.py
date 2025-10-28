@@ -14,6 +14,7 @@ import json
 import pytz
 # import uvicorn
 
+
 def decrypt_service_account():
     """Decrypt encrypted_data.bin into a dict (not a file)."""
     try:
@@ -64,12 +65,14 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # --- Google Sheets Auth (in-memory) ---
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
+    "https://www.googleapis.com/auth/drive",
 ]
 
 try:
     service_account_dict = decrypt_service_account()  # in-memory dict
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_dict, SCOPE)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(
+        service_account_dict, SCOPE
+    )
     gc = gspread.authorize(creds)
     sh = gc.open(SPREADSHEET_NAME)
     master_sheet = sh.worksheet(MASTER_SHEET_NAME)
@@ -84,14 +87,18 @@ def get_employees():
     try:
         rows = employee_sheet.get_all_records()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read employee sheet: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to read employee sheet: {e}"
+        )
     return {
-        str(r.get("E-mail", "")).strip().lower(): {
+        str(r.get("E-mail", ""))
+        .strip()
+        .lower(): {
             "id": r.get("ID", ""),
             "full_name": r.get("Full Name", ""),
             "nickname": r.get("Nickname", ""),
             "office_email": str(r.get("Office mail", "")).strip(),
-            "score": int(r.get("Score",0))
+            "score": int(r.get("Score", 0)),
         }
         for r in rows
     }
@@ -101,7 +108,9 @@ def get_companies():
     try:
         rows = company_sheet.get_all_records()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read company sheet: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to read company sheet: {e}"
+        )
     return [r["Company Name"] for r in rows if r.get("Company Name")]
 
 
@@ -116,6 +125,7 @@ def add_company(new_company: str):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to add company: {e}")
 
+
 # # OLD Logic
 # def get_all_records():
 #     try:
@@ -129,10 +139,9 @@ def get_all_records():
     try:
         return master_sheet.get_all_records()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch master records: {e}")
-
-
-
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch master records: {e}"
+        )
 
 
 # # OLD Logic
@@ -147,14 +156,13 @@ def get_all_records():
 def find_record_for_today(email: str, today: str, records: List[dict]):
     """Find the most recent record for today (searches from top to bottom)"""
     for idx, r in enumerate(records):
-        if str(r.get("E-mail", "")).strip().lower() == email and str(r.get("Date", "")).strip() == today:
+        if (
+            str(r.get("E-mail", "")).strip().lower() == email
+            and str(r.get("Date", "")).strip() == today
+        ):
             # Add 2 because: +1 for 1-indexed sheets, +1 for header row
             return r, idx + 2
     return None, None
-
-
-
-
 
 
 def is_ip_allowed(ip: str):
@@ -194,19 +202,23 @@ def api_get_companies():
 def api_get_employees():
     try:
         rows = employee_sheet.get_all_records()
+        employee_data = []
+        for r in rows:
+            employee_data.append(
+                {
+                    "id": r.get("ID", ""),
+                    "full_name": r.get("Full Name", ""),
+                    "nickname": r.get("Nickname", ""),
+                    "email": r.get("E-mail", ""),
+                    "office_email": r.get("Office mail", ""),
+                    "score": int(r.get("Score", 0)),
+                }
+            )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read employee sheet: {e}")
-    return [
-        {
-            "id": r.get("ID", ""),
-            "full_name": r.get("Full Name", ""),
-            "nickname": r.get("Nickname", ""),
-            "email": r.get("E-mail", ""),
-            "office_email": r.get("Office mail", ""),
-            "score": int(r.get("Score", 0))
-        }
-        for r in rows
-    ]
+        raise HTTPException(
+            status_code=500, detail=f"Failed to read employee sheet: {e}"
+        )
+    return employee_data
 
 
 # NEW Lodic
@@ -241,29 +253,56 @@ def handle_attendance(payload: AttendanceIn, request: Request):
     if action == "checkin":
         if existing_record and existing_record.get("Check In") == "Checked In":
             raise HTTPException(status_code=400, detail="Already checked in today")
-        
+
         row = [
-            emp_id, nickname, full_name, email, office_email,
-            today, time_now, "Checked In", "", "", ip, "", "", "", "", ""
+            emp_id,
+            nickname,
+            full_name,
+            email,
+            office_email,
+            today,
+            time_now,
+            "Checked In",
+            "",
+            "",
+            ip,
+            "",
+            "",
+            "",
+            "",
+            "",
         ]
         try:
             # Insert at row 2 (right after header) instead of appending to bottom
             master_sheet.insert_row(row, index=2)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to insert check-in: {e}")
-        return {"status": "checked_in", "time": time_now, "ip": ip, "office_email": office_email}
+            raise HTTPException(
+                status_code=500, detail=f"Failed to insert check-in: {e}"
+            )
+        return {
+            "status": "checked_in",
+            "time": time_now,
+            "ip": ip,
+            "office_email": office_email,
+        }
 
     elif action == "checkout":
         if not existing_record or existing_record.get("Check In") != "Checked In":
-            raise HTTPException(status_code=400, detail="Check-in required before checkout")
+            raise HTTPException(
+                status_code=400, detail="Check-in required before checkout"
+            )
         if not payload.tasks or len(payload.tasks) == 0:
-            raise HTTPException(status_code=400, detail="At least one task is required for checkout")
+            raise HTTPException(
+                status_code=400, detail="At least one task is required for checkout"
+            )
 
         try:
-            checkin_ip = existing_record.get("Check in IP", existing_record.get("Check in IP", ""))
+            checkin_ip = existing_record.get(
+                "Check in IP", existing_record.get("Check in IP", "")
+            )
             first_task = payload.tasks[0]
             add_company(first_task.task_for)
-            
+
             # Update the existing check-in row with checkout info
             master_sheet.update_cell(row_index, 9, time_now)
             master_sheet.update_cell(row_index, 10, "Checked Out")
@@ -277,21 +316,43 @@ def handle_attendance(payload: AttendanceIn, request: Request):
             for task in payload.tasks[1:]:
                 add_company(task.task_for)
                 row = [
-                    emp_id, nickname, full_name, email, office_email,
-                    today, time_now, "Checked In", time_now, "Checked Out",
-                    checkin_ip, ip,
-                    task.task_for, task.task_name, task.task_details, task.my_role
+                    emp_id,
+                    nickname,
+                    full_name,
+                    email,
+                    office_email,
+                    today,
+                    time_now,
+                    "Checked In",
+                    time_now,
+                    "Checked Out",
+                    checkin_ip,
+                    ip,
+                    task.task_for,
+                    task.task_name,
+                    task.task_details,
+                    task.my_role,
                 ]
                 # Insert additional task rows at the top
                 master_sheet.insert_row(row, index=2)
 
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to update checkout: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to update checkout: {e}"
+            )
 
-        return {"status": "checked_out", "time": time_now, "ip": ip, "office_email": office_email}
+        return {
+            "status": "checked_out",
+            "time": time_now,
+            "ip": ip,
+            "office_email": office_email,
+        }
 
     else:
-        raise HTTPException(status_code=400, detail="Invalid action (use 'checkin' or 'checkout')")
+        raise HTTPException(
+            status_code=400, detail="Invalid action (use 'checkin' or 'checkout')"
+        )
+
 
 @app.get("/")
 def read_index():
@@ -302,7 +363,6 @@ def read_index():
     except FileNotFoundError:
         raise HTTPException(status_code=500, detail="index.html not found")
     return HTMLResponse(html_content.replace("YOUR_CLIENT_ID_HERE", CLIENT_ID))
-
 
 
 # if __name__ == "__main__":
