@@ -1,424 +1,555 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance System</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="/static/style.css">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 </head>
+
 <body>
-<div class="container">
-    <div class="header">
-        <div class="logo">
-            <i class="fas fa-clock"></i>
-            <h2>AI Team</h2>
-        </div>
-        <!-- <div class="team-badge"></div> -->
-    </div>
-
-    <div style="font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;max-width:900px;margin:32px auto;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);overflow:hidden;border:1px solid #e5e7eb;background:#f9fafb;">
-    <header style="background:linear-gradient(135deg,#0f172a 0%,#0369a1 100%);color:#fff;padding:28px 32px;">
-        <h1 style="margin:0;font-size:22px;letter-spacing:0.3px;">Attendance & Performance Policy</h1>
-        <p style="margin:8px 0 0 0;opacity:0.85;font-size:14px;">Transparent, consistent, and merit-based daily evaluation system (Total: <strong>10 points</strong>)</p>
-    </header>
-
-    <main style="padding:28px;color:#0f172a;background:#fff;">
-        <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;">Attendance Guidelines</h2>
-        <ul style="margin:0 0 24px 20px;line-height:1.55;">
-        <li><strong>Single Check-in:</strong> Only one check-in per day is allowed. Multiple attempts will be rejected automatically.</li>
-        <li><strong>Multiple Tasks:</strong> Employees can add multiple tasks throughout the day after check-in; all contribute to the day's evaluation.</li>
-        <li><strong>Multiple Check-outs:</strong> If more than one check-out is submitted, <strong>the last one is retained</strong>; earlier ones are replaced.</li>
-        <li><strong>Check-in before 10:35 AM:</strong> earns positive points.</li>
-        <li><strong>Check-in after 10:35 AM:</strong> earns negative points.</li>
-        <li><strong>Check-out before 6:55 PM:</strong> negative points.</li>
-        <li><strong>Check-out after 6:55 PM:</strong> positive points.</li>
-        <li><strong>Debug or issue solve in Ops & AI group:</strong> positive points.</li>
-        <li><strong>Missed or delayed timeline:</strong> negative points.</li>
-        <li><strong>Daily work quality:</strong> scored by manager discretion.</li>
-        <li><strong>Innovation / new build:</strong> positive points.</li>
-        </ul>
-
-        <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;">Mark Distribution (Total = <span style="color:#0284c7;">10 Points</span>)</h2>
-        <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;">
-        <thead>
-            <tr style="background:#f1f5f9;">
-            <th style="text-align:left;padding:12px 14px;">Category</th>
-            <th style="text-align:right;padding:12px 14px;">Max Points</th>
-            <th style="text-align:left;padding:12px 14px;">Remarks</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Punctuality (Check-in before 10:35 AM)</td><td style="text-align:right;padding:10px 14px;">1.0</td><td style="padding:10px 14px;">Consistency and Discipline</td></tr>
-            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Work Duration (Check-out after 6:55 PM)</td><td style="text-align:right;padding:10px 14px;">1.0</td><td style="padding:10px 14px;">Commitment to full shift</td></tr>
-            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Task Completion & Quality</td><td style="text-align:right;padding:10px 14px;">2.0</td><td style="padding:10px 14px;">Deliverables, accuracy, and meeting deadlines</td></tr>
-            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Innovation / New Builds</td><td style="text-align:right;padding:10px 14px;">2.0</td><td style="padding:10px 14px;">Original contributions, prototypes, or new solutions</td></tr>
-            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Debug & Issue Solving (Ops & AI)</td><td style="text-align:right;padding:10px 14px;">2.0</td><td style="padding:10px 14px;">Problem-solving & reliability</td></tr>
-            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Collaboration & Conduct</td><td style="text-align:right;padding:10px 14px;">1.0</td><td style="padding:10px 14px;">Professional behavior, teamwork, and supporting peers</td></tr>
-            <tr><td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Proactive Improvement / Documentation</td><td style="text-align:right;padding:10px 14px;">1.0</td><td style="padding:10px 14px;">Identifying workflow inefficiencies or contributing useful documentation</td></tr>
-            <tr style="background:#f9fafb;font-weight:600;">
-            <td style="padding:12px 14px;border-top:1px solid #e2e8f0;">Total</td>
-            <td style="text-align:right;padding:12px 14px;">10.0</td>
-            <td style="padding:12px 14px;">Final capped score</td>
-            </tr>
-        </tbody>
-        </table>
-
-        <h2 style="margin:0 0 10px;font-size:17px;font-weight:600;">Penalty & Deductions</h2>
-        <ul style="margin:6px 0 22px 20px;line-height:1.55;">
-        <li>Late Check-in (after 10:35 AM): <span style="color:#b91c1c;">-1.5</span></li>
-        <li>Early Check-out (before 6:55 PM): <span style="color:#b91c1c;">-1.5</span></li>
-        <li>Missed Deadline: <span style="color:#b91c1c;">-2.0</span></li>
-        <li>Repeated Behavioral Offense: <span style="color:#b91c1c;">-2.0</span></li>
-        <li>Consistent Week Performance: <span style="color:#b91c1c;">-1.0</span></li>
-        </ul>
-
-        <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:20px;">
-        <h3 style="margin:0 0 8px;font-size:15px;font-weight:600;">System Behavior Summary</h3>
-        <ul style="margin:0 0 0 18px;line-height:1.55;">
-            <li>Only <strong>one check-in</strong> per day is recorded.</li>
-            <li>Multiple <strong>tasks</strong> may be logged freely under one attendance entry.</li>
-            <li>When multiple check-outs occur, <strong>only the last one</strong> is stored. Earlier entries are replaced automatically.</li>
-            <li>All timestamps and activities are synced with the server clock (UTC+6).</li>
-        </ul>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-clock"></i>
+                <h2>AI Team</h2>
+            </div>
+            <!-- <div class="team-badge"></div> -->
         </div>
 
-        <p style="margin:0;font-size:13px;color:#475569;">Prepared by <strong>Rakib</strong></em></p>
-        <p style="margin:0;font-size:13px;color:#475569;">Effective Date: <em>1st October, 2025</em></p>
-    </main>
-    </div>
+        <div
+            style="font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;max-width:900px;margin:32px auto;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.05);overflow:hidden;border:1px solid #e5e7eb;background:#f9fafb;">
+            <header style="background:linear-gradient(135deg,#0f172a 0%,#0369a1 100%);color:#fff;padding:28px 32px;">
+                <h1 style="margin:0;font-size:22px;letter-spacing:0.3px;">Attendance & Performance Policy</h1>
+                <p style="margin:8px 0 0 0;opacity:0.85;font-size:14px;">Transparent, consistent, and merit-based daily
+                    evaluation system (Total: <strong>10 points</strong>)</p>
+            </header>
+
+            <div class="container">
+                <h1>Dashboard</h1>
+                <!-- other UI parts here -->
+
+                <!-- Employee List -->
+                <div id="employeeList"
+                    style="margin:40px auto;max-width:800px;padding:20px;border-radius:10px;background:#ffffff;border:1px solid #e2e8f0;">
+                    <h3 style="margin-bottom:16px;font-size:18px;font-weight:600;color:#0f172a;">
+                        Current Employee Scores
+                    </h3>
+                    <div id="employeeTable"></div>
+                </div>
+            </div>
+
+            <main style="padding:28px;color:#0f172a;background:#fff;">
+                <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;">Attendance Guidelines</h2>
+                <ul style="margin:0 0 24px 20px;line-height:1.55;">
+                    <li><strong>Single Check-in:</strong> Only one check-in per day is allowed. Multiple attempts will
+                        be rejected automatically.</li>
+                    <li><strong>Multiple Tasks:</strong> Employees can add multiple tasks throughout the day after
+                        check-in; all contribute to the day's evaluation.</li>
+                    <li><strong>Multiple Check-outs:</strong> If more than one check-out is submitted, <strong>the last
+                            one is retained</strong>; earlier ones are replaced.</li>
+                    <li><strong>Check-in before 10:35 AM:</strong> earns positive points.</li>
+                    <li><strong>Check-in after 10:35 AM:</strong> earns negative points.</li>
+                    <li><strong>Check-out before 6:55 PM:</strong> negative points.</li>
+                    <li><strong>Check-out after 6:55 PM:</strong> positive points.</li>
+                    <li><strong>Debug or issue solve in Ops & AI group:</strong> positive points.</li>
+                    <li><strong>Missed or delayed timeline:</strong> negative points.</li>
+                    <li><strong>Daily work quality:</strong> scored by manager discretion.</li>
+                    <li><strong>Innovation / new build:</strong> positive points.</li>
+                </ul>
+
+                <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;">Mark Distribution (Total = <span
+                        style="color:#0284c7;">10 Points</span>)</h2>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="text-align:left;padding:12px 14px;">Category</th>
+                            <th style="text-align:right;padding:12px 14px;">Max Points</th>
+                            <th style="text-align:left;padding:12px 14px;">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Punctuality (Check-in before
+                                10:35 AM)</td>
+                            <td style="text-align:right;padding:10px 14px;">1.0</td>
+                            <td style="padding:10px 14px;">Consistency and Discipline</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Work Duration (Check-out after
+                                6:55 PM)</td>
+                            <td style="text-align:right;padding:10px 14px;">1.0</td>
+                            <td style="padding:10px 14px;">Commitment to full shift</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Task Completion & Quality</td>
+                            <td style="text-align:right;padding:10px 14px;">2.0</td>
+                            <td style="padding:10px 14px;">Deliverables, accuracy, and meeting deadlines</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Innovation / New Builds</td>
+                            <td style="text-align:right;padding:10px 14px;">2.0</td>
+                            <td style="padding:10px 14px;">Original contributions, prototypes, or new solutions</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Debug & Issue Solving (Ops & AI)
+                            </td>
+                            <td style="text-align:right;padding:10px 14px;">2.0</td>
+                            <td style="padding:10px 14px;">Problem-solving & reliability</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Collaboration & Conduct</td>
+                            <td style="text-align:right;padding:10px 14px;">1.0</td>
+                            <td style="padding:10px 14px;">Professional behavior, teamwork, and supporting peers</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px 14px;border-top:1px solid #e2e8f0;">Proactive Improvement /
+                                Documentation</td>
+                            <td style="text-align:right;padding:10px 14px;">1.0</td>
+                            <td style="padding:10px 14px;">Identifying workflow inefficiencies or contributing useful
+                                documentation</td>
+                        </tr>
+                        <tr style="background:#f9fafb;font-weight:600;">
+                            <td style="padding:12px 14px;border-top:1px solid #e2e8f0;">Total</td>
+                            <td style="text-align:right;padding:12px 14px;">10.0</td>
+                            <td style="padding:12px 14px;">Final capped score</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 style="margin:0 0 10px;font-size:17px;font-weight:600;">Penalty & Deductions</h2>
+                <ul style="margin:6px 0 22px 20px;line-height:1.55;">
+                    <li>Late Check-in (after 10:35 AM): <span style="color:#b91c1c;">-1.5</span></li>
+                    <li>Early Check-out (before 6:55 PM): <span style="color:#b91c1c;">-1.5</span></li>
+                    <li>Missed Deadline: <span style="color:#b91c1c;">-2.0</span></li>
+                    <li>Repeated Behavioral Offense: <span style="color:#b91c1c;">-2.0</span></li>
+                    <li>Consistent Week Performance: <span style="color:#b91c1c;">-1.0</span></li>
+                </ul>
+
+                <div
+                    style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:20px;">
+                    <h3 style="margin:0 0 8px;font-size:15px;font-weight:600;">System Behavior Summary</h3>
+                    <ul style="margin:0 0 0 18px;line-height:1.55;">
+                        <li>Only <strong>one check-in</strong> per day is recorded.</li>
+                        <li>Multiple <strong>tasks</strong> may be logged freely under one attendance entry.</li>
+                        <li>When multiple check-outs occur, <strong>only the last one</strong> is stored. Earlier
+                            entries are replaced automatically.</li>
+                        <li>All timestamps and activities are synced with the server clock (UTC+6).</li>
+                    </ul>
+                </div>
+
+                <p style="margin:0;font-size:13px;color:#475569;">Prepared by <strong>Rakib</strong></em></p>
+                <p style="margin:0;font-size:13px;color:#475569;">Effective Date: <em>1st October, 2025</em></p>
+            </main>
+        </div>
 
 
 
-    <div id="signin-section">
-        <button id="googleSignInBtn" class="google-signin-btn">
-            <i class="fab fa-google"></i>
-            Sign in with Google
-        </button>
-    </div>
+        <div id="signin-section">
+            <button id="googleSignInBtn" class="google-signin-btn">
+                <i class="fab fa-google"></i>
+                Sign in with Google
+            </button>
+        </div>
 
-    <form id="attForm" class="hidden">
-        <div class="form-section">
-            <h3><i class="fas fa-user"></i> Personal Information</h3>
-            <div class="form-grid">
-                <div class="input-group">
-                    <label>Employee ID</label>
-                    <input type="number" id="emp_id" readonly />
-                </div>
-                <div class="input-group">
-                    <label>Score</label>
-                    <input type="text" id="score" readonly />
-                </div>
-                <div class="input-group">
-                    <label>Office Mail</label>
-                    <input type="email" id="office_email" readonly />
-                </div>
-                <div class="input-group">
-                    <label>Email (from Google)</label>
-                    <input type="email" name="email" id="email" readonly />
-                </div>
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" id="full_name" readonly />
-                </div>
-                <div class="input-group">
-                    <label>Nickname</label>
-                    <input type="text" id="nickname" readonly />
-                </div>
-                <div class="input-group">
-                    <label>Time (BD)</label>
-                    <div class="time-display">
-                        <i class="fas fa-clock"></i>
-                        <input type="text" id="time_now" readonly />
+        <form id="attForm" class="hidden">
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Employee ID</label>
+                        <input type="number" id="emp_id" readonly />
+                    </div>
+                    <div class="input-group">
+                        <label>Score</label>
+                        <input type="text" id="score" readonly />
+                    </div>
+                    <div class="input-group">
+                        <label>Office Mail</label>
+                        <input type="email" id="office_email" readonly />
+                    </div>
+                    <div class="input-group">
+                        <label>Email (from Google)</label>
+                        <input type="email" name="email" id="email" readonly />
+                    </div>
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="full_name" readonly />
+                    </div>
+                    <div class="input-group">
+                        <label>Nickname</label>
+                        <input type="text" id="nickname" readonly />
+                    </div>
+                    <div class="input-group">
+                        <label>Time (BD)</label>
+                        <div class="time-display">
+                            <i class="fas fa-clock"></i>
+                            <input type="text" id="time_now" readonly />
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="form-section">
-            <h3><i class="fas fa-tasks"></i> Attendance Action</h3>
-            <div class="input-group">
-                <label>Action <span class="required">*</span></label>
-                <div class="select-wrapper">
-                    <select id="action" name="action" required>
-                        <option value="">-- select action --</option>
-                        <option value="checkin">Check In</option>
-                        <option value="checkout">Check Out</option>
-                    </select>
-                    <i class="fas fa-chevron-down"></i>
+            <div class="form-section">
+                <h3><i class="fas fa-tasks"></i> Attendance Action</h3>
+                <div class="input-group">
+                    <label>Action <span class="required">*</span></label>
+                    <div class="select-wrapper">
+                        <select id="action" name="action" required>
+                            <option value="">-- select action --</option>
+                            <option value="checkin">Check In</option>
+                            <option value="checkout">Check Out</option>
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="checkoutFields" class="hidden">
-            <div class="form-section">
-                <h3><i class="fas fa-clipboard-list"></i> Task Details</h3>
-                <div id="tasks_container"></div>
-                <button type="button" id="addTaskBtn" class="secondary-btn">
-                    <i class="fas fa-plus"></i> Add Another Task
-                </button>
+            <div id="checkoutFields" class="hidden">
+                <div class="form-section">
+                    <h3><i class="fas fa-clipboard-list"></i> Task Details</h3>
+                    <div id="tasks_container"></div>
+                    <button type="button" id="addTaskBtn" class="secondary-btn">
+                        <i class="fas fa-plus"></i> Add Another Task
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <button type="submit" class="submit-btn">
-            <span class="btn-text">Submit Attendance</span>
-            <span class="btn-spinner hidden"><i class="fas fa-spinner fa-spin"></i> Processing...</span>
-        </button>
-    </form>
+            <button type="submit" class="submit-btn">
+                <span class="btn-text">Submit Attendance</span>
+                <span class="btn-spinner hidden"><i class="fas fa-spinner fa-spin"></i> Processing...</span>
+            </button>
+        </form>
 
-    <div id="toast" class="toast"></div>
-</div>
+        <div id="toast" class="toast"></div>
+    </div>
 
-<script>
-const apiBase = ""; // backend URL
-let userEmail = "";
+    <script>
+        const apiBase = ""; // backend URL
+        let userEmail = "";
 
-// Toast notification
-function showToast(message, success = true) {
-    const toast = document.getElementById("toast");
-    toast.innerHTML = `<i class="fas ${success ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
-    toast.style.background = success ? "#4BB543" : "#E74C3C";
-    toast.classList.add("show");
-    setTimeout(() => { toast.classList.remove("show"); }, 3000);
-}
-
-// Bangladesh time
-function getBDTime() {
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const bdOffset = 6 * 60 * 60 * 1000;
-    const bdDate = new Date(utc + bdOffset);
-    let hours = bdDate.getHours();
-    const minutes = bdDate.getMinutes();
-    const seconds = bdDate.getSeconds();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const minStr = minutes < 10 ? '0' + minutes : minutes;
-    const secStr = seconds < 10 ? '0' + seconds : seconds;
-    return `${hours}:${minStr}:${secStr} ${ampm}`;
-}
-
-// Google Sign-In
-function handleCredentialResponse(response) {
-    const data = jwt_decode(response.credential);
-    userEmail = data.email;
-
-    document.getElementById("email").value = userEmail;
-    document.getElementById("attForm").classList.remove("hidden");
-    document.getElementById("signin-section").classList.add("hidden");
-
-    document.getElementById("time_now").value = getBDTime();
-    loadEmployeeInfo(userEmail);
-}
-
-window.onload = function() {
-    google.accounts.id.initialize({
-        client_id: "YOUR_CLIENT_ID_HERE",
-        callback: handleCredentialResponse
-    });
-    google.accounts.id.renderButton(
-        document.getElementById("googleSignInBtn"),
-        { theme: "outline", size: "large", width: "100%" }
-    );
-    google.accounts.id.prompt();
-};
-
-setInterval(() => {
-    if (document.getElementById("time_now").value)
-        document.getElementById("time_now").value = getBDTime();
-}, 1000);
-
-// Employee info
-async function loadEmployeeInfo(email) {
-    try {
-        const res = await fetch(apiBase + "/config/employees");
-        const data = await res.json();
-        const emp = data.find(e => e.email.toLowerCase() === email.toLowerCase());
-        if (emp) {
-            document.getElementById("emp_id").value = emp.id;
-            document.getElementById("office_email").value = emp.office_email;
-            document.getElementById("full_name").value = emp.full_name;
-            document.getElementById("nickname").value = emp.nickname;
-            document.getElementById("score").value = emp.score;
-        } else {
-            showToast("Email not registered in the system", false);
+        // Toast notification
+        function showToast(message, success = true) {
+            const toast = document.getElementById("toast");
+            toast.innerHTML = `<i class="fas ${success ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
+            toast.style.background = success ? "#4BB543" : "#E74C3C";
+            toast.classList.add("show");
+            setTimeout(() => { toast.classList.remove("show"); }, 3000);
         }
-    } catch (err) {
-        console.warn(err);
-        showToast("Error loading employee information", false);
-    }
-}
 
-// Task block template
-async function createTaskBlock() {
-    const res = await fetch(apiBase + "/config/companies");
-    const data = await res.json();
-    const container = document.getElementById("tasks_container");
-
-    const taskDiv = document.createElement("div");
-    taskDiv.className = "task-block";
-
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "remove-task";
-    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-    removeBtn.onclick = () => taskDiv.remove();
-    taskDiv.appendChild(removeBtn);
-
-    // Task For
-    const taskForLabel = document.createElement("label");
-    taskForLabel.innerText = "Task For";
-    taskDiv.appendChild(taskForLabel);
-
-    const taskForSel = document.createElement("select");
-    taskForSel.innerHTML = `<option value="">-- select company --</option>`;
-    data.companies.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.text = c;
-        taskForSel.appendChild(opt);
-    });
-    const otherOpt = document.createElement("option");
-    otherOpt.value = "Other";
-    otherOpt.text = "Other";
-    taskForSel.appendChild(otherOpt);
-    taskDiv.appendChild(taskForSel);
-
-    const taskForOther = document.createElement("input");
-    taskForOther.type = "text";
-    taskForOther.placeholder = "Specify company/project name";
-    taskForOther.style.display = "none";
-    taskForOther.className = "other-input";
-    taskDiv.appendChild(taskForOther);
-
-    taskForSel.addEventListener("change", () => {
-        taskForOther.style.display = taskForSel.value === "Other" ? "block" : "none";
-    });
-
-    // Task Name
-    const taskNameLabel = document.createElement("label");
-    taskNameLabel.innerHTML = "Task Name <span class='required'>*</span>";
-    taskDiv.appendChild(taskNameLabel);
-    const taskNameInput = document.createElement("input");
-    taskNameInput.type = "text";
-    taskNameInput.placeholder = "Enter task name";
-    taskNameInput.required = true;
-    taskDiv.appendChild(taskNameInput);
-
-    // Task Details
-    const taskDetailsLabel = document.createElement("label");
-    taskDetailsLabel.innerHTML = "Task Details <span class='required'>*</span>";
-    taskDiv.appendChild(taskDetailsLabel);
-    const taskDetailsInput = document.createElement("textarea");
-    taskDetailsInput.rows = 3;
-    taskDetailsInput.placeholder = "Describe the task in detail";
-    taskDetailsInput.required = true;
-    taskDiv.appendChild(taskDetailsInput);
-
-    // My Role
-    const myRoleLabel = document.createElement("label");
-    myRoleLabel.innerHTML = "My Role to Complete Task <span class='required'>*</span>";
-    taskDiv.appendChild(myRoleLabel);
-    const myRoleInput = document.createElement("textarea");
-    myRoleInput.rows = 2;
-    myRoleInput.placeholder = "Describe your role in completing this task";
-    myRoleInput.required = true;
-    taskDiv.appendChild(myRoleInput);
-
-    container.appendChild(taskDiv);
-}
-
-// Add first task initially
-document.getElementById("addTaskBtn").addEventListener("click", createTaskBlock);
-
-// Show/hide checkout fields
-document.getElementById("action").addEventListener("change", e => {
-    if (e.target.value === "checkout") {
-        document.getElementById("checkoutFields").classList.remove("hidden");
-        if (document.getElementById("tasks_container").children.length === 0) {
-            createTaskBlock();
+        // Bangladesh time
+        function getBDTime() {
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const bdOffset = 6 * 60 * 60 * 1000;
+            const bdDate = new Date(utc + bdOffset);
+            let hours = bdDate.getHours();
+            const minutes = bdDate.getMinutes();
+            const seconds = bdDate.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            const minStr = minutes < 10 ? '0' + minutes : minutes;
+            const secStr = seconds < 10 ? '0' + seconds : seconds;
+            return `${hours}:${minStr}:${secStr} ${ampm}`;
         }
-    } else {
-        document.getElementById("checkoutFields").classList.add("hidden");
-        document.getElementById("tasks_container").innerHTML = "";
-    }
-});
 
-// Submit with modern spinner and mandatory validation
-document.getElementById("attForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const submitBtn = e.target.querySelector("button[type='submit']");
-    const btnText = submitBtn.querySelector(".btn-text");
-    const btnSpinner = submitBtn.querySelector(".btn-spinner");
-    
-    btnText.classList.add("hidden");
-    btnSpinner.classList.remove("hidden");
-    submitBtn.disabled = true;
+        // Google Sign-In
+        function handleCredentialResponse(response) {
+            const data = jwt_decode(response.credential);
+            userEmail = data.email;
 
-    const action = document.getElementById("action").value.trim();
-    const payload = { email: userEmail, action };
+            document.getElementById("email").value = userEmail;
+            document.getElementById("attForm").classList.remove("hidden");
+            document.getElementById("signin-section").classList.add("hidden");
 
-    if (action === "checkout") {
-        const taskBlocks = document.querySelectorAll(".task-block");
-        if (taskBlocks.length === 0) {
-            showToast("Please add at least one task for checkout", false);
-            btnText.classList.remove("hidden");
-            btnSpinner.classList.add("hidden");
-            submitBtn.disabled = false;
-            return;
+            document.getElementById("time_now").value = getBDTime();
+            loadEmployeeInfo(userEmail);
         }
-        const tasks = [];
-        for (const block of taskBlocks) {
-            let task_for = block.querySelector("select").value.trim();
-            if (task_for === "Other") task_for = block.querySelector(".other-input").value.trim();
-            const task_name = block.querySelectorAll("input,textarea")[1].value.trim();
-            const task_details = block.querySelectorAll("input,textarea")[2].value.trim();
-            const my_role = block.querySelectorAll("input,textarea")[3].value.trim();
 
-            if (!task_for || !task_name || !task_details || !my_role) {
-                showToast("All fields (*) are mandatory for each task", false);
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: "YOUR_CLIENT_ID_HERE",
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("googleSignInBtn"),
+                { theme: "outline", size: "large", width: "100%" }
+            );
+            google.accounts.id.prompt();
+        };
+        setInterval(() => {
+            if (document.getElementById("time_now").value)
+                document.getElementById("time_now").value = getBDTime();
+        }, 1000);
+
+        // Employee info
+        async function loadEmployeeInfo(email) {
+            try {
+                const res = await fetch(apiBase + "/config/employees");
+                const data = await res.json();
+                const emp = data.find(e => e.email.toLowerCase() === email.toLowerCase());
+                if (emp) {
+                    document.getElementById("emp_id").value = emp.id;
+                    document.getElementById("office_email").value = emp.office_email;
+                    document.getElementById("full_name").value = emp.full_name;
+                    document.getElementById("nickname").value = emp.nickname;
+                    document.getElementById("score").value = emp.score;
+                } else {
+                    showToast("Email not registered in the system", false);
+                }
+            } catch (err) {
+                console.warn(err);
+                showToast("Error loading employee information", false);
+            }
+        }
+
+
+        // ALL Employee info
+        async function load_all_employee_info() {
+            try {
+                const res = await fetch(apiBase + "/config/employees");
+                const data = await res.json();
+
+                const processed = data.map(emp => {
+                    let numericScore = Number(emp.score) || 0;
+
+                    // Display score for Rakib
+                    let displayScore = emp.nickname === "Rakib"
+                        ? `${emp.score} of ${emp.score / 10} days`
+                        : emp.score;
+
+                    // Name: if Rakib, show special label; else full name
+                    let displayName = emp.nickname === "Rakib"
+                        ? "Total Distributed Mark"
+                        : emp.full_name;
+
+                    return {
+                        name: displayName,
+                        score: displayScore,
+                        numericScore: numericScore
+                    };
+                });
+
+                // Sort from high to low score
+                processed.sort((a, b) => b.numericScore - a.numericScore);
+
+                return processed;
+            } catch (err) {
+                console.warn(err);
+                showToast("Error loading employee information", false);
+                return [];
+            }
+        }
+
+
+
+        async function showEmployees() {
+            const employees = await load_all_employee_info();
+            const tableDiv = document.getElementById("employeeTable");
+
+            if (!employees.length) {
+                tableDiv.innerHTML = "<p style='color:#b91c1c;'>No employee data available.</p>";
+                return;
+            }
+
+            let html = `
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <thead>
+                <tr style="background:#f1f5f9;">
+                    <th style="text-align:left;padding:10px 14px;border-bottom:1px solid #e2e8f0;">Employee Name</th>
+                    <th style="text-align:right;padding:10px 14px;border-bottom:1px solid #e2e8f0;">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+            employees.forEach(emp => {
+                html += `
+            <tr>
+                <td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;">${emp.name}</td>
+                <td style="text-align:right;padding:10px 14px;border-bottom:1px solid #f1f5f9;">${emp.score}</td>
+            </tr>
+        `;
+            });
+
+            html += "</tbody></table>";
+            tableDiv.innerHTML = html;
+        }
+        showEmployees();
+
+        // Task block template
+        async function createTaskBlock() {
+            const res = await fetch(apiBase + "/config/companies");
+            const data = await res.json();
+            const container = document.getElementById("tasks_container");
+
+            const taskDiv = document.createElement("div");
+            taskDiv.className = "task-block";
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "remove-task";
+            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            removeBtn.onclick = () => taskDiv.remove();
+            taskDiv.appendChild(removeBtn);
+
+            // Task For
+            const taskForLabel = document.createElement("label");
+            taskForLabel.innerText = "Task For";
+            taskDiv.appendChild(taskForLabel);
+
+            const taskForSel = document.createElement("select");
+            taskForSel.innerHTML = `<option value="">-- select company --</option>`;
+            data.companies.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value = c;
+                opt.text = c;
+                taskForSel.appendChild(opt);
+            });
+            const otherOpt = document.createElement("option");
+            otherOpt.value = "Other";
+            otherOpt.text = "Other";
+            taskForSel.appendChild(otherOpt);
+            taskDiv.appendChild(taskForSel);
+
+            const taskForOther = document.createElement("input");
+            taskForOther.type = "text";
+            taskForOther.placeholder = "Specify company/project name";
+            taskForOther.style.display = "none";
+            taskForOther.className = "other-input";
+            taskDiv.appendChild(taskForOther);
+
+            taskForSel.addEventListener("change", () => {
+                taskForOther.style.display = taskForSel.value === "Other" ? "block" : "none";
+            });
+
+            // Task Name
+            const taskNameLabel = document.createElement("label");
+            taskNameLabel.innerHTML = "Task Name <span class='required'>*</span>";
+            taskDiv.appendChild(taskNameLabel);
+            const taskNameInput = document.createElement("input");
+            taskNameInput.type = "text";
+            taskNameInput.placeholder = "Enter task name";
+            taskNameInput.required = true;
+            taskDiv.appendChild(taskNameInput);
+
+            // Task Details
+            const taskDetailsLabel = document.createElement("label");
+            taskDetailsLabel.innerHTML = "Task Details <span class='required'>*</span>";
+            taskDiv.appendChild(taskDetailsLabel);
+            const taskDetailsInput = document.createElement("textarea");
+            taskDetailsInput.rows = 3;
+            taskDetailsInput.placeholder = "Describe the task in detail";
+            taskDetailsInput.required = true;
+            taskDiv.appendChild(taskDetailsInput);
+
+            // My Role
+            const myRoleLabel = document.createElement("label");
+            myRoleLabel.innerHTML = "My Role to Complete Task <span class='required'>*</span>";
+            taskDiv.appendChild(myRoleLabel);
+            const myRoleInput = document.createElement("textarea");
+            myRoleInput.rows = 2;
+            myRoleInput.placeholder = "Describe your role in completing this task";
+            myRoleInput.required = true;
+            taskDiv.appendChild(myRoleInput);
+
+            container.appendChild(taskDiv);
+        }
+
+        // Add first task initially
+        document.getElementById("addTaskBtn").addEventListener("click", createTaskBlock);
+
+        // Show/hide checkout fields
+        document.getElementById("action").addEventListener("change", e => {
+            if (e.target.value === "checkout") {
+                document.getElementById("checkoutFields").classList.remove("hidden");
+                if (document.getElementById("tasks_container").children.length === 0) {
+                    createTaskBlock();
+                }
+            } else {
+                document.getElementById("checkoutFields").classList.add("hidden");
+                document.getElementById("tasks_container").innerHTML = "";
+            }
+        });
+
+        // Submit with modern spinner and mandatory validation
+        document.getElementById("attForm").addEventListener("submit", async e => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector("button[type='submit']");
+            const btnText = submitBtn.querySelector(".btn-text");
+            const btnSpinner = submitBtn.querySelector(".btn-spinner");
+
+            btnText.classList.add("hidden");
+            btnSpinner.classList.remove("hidden");
+            submitBtn.disabled = true;
+
+            const action = document.getElementById("action").value.trim();
+            const payload = { email: userEmail, action };
+
+            if (action === "checkout") {
+                const taskBlocks = document.querySelectorAll(".task-block");
+                if (taskBlocks.length === 0) {
+                    showToast("Please add at least one task for checkout", false);
+                    btnText.classList.remove("hidden");
+                    btnSpinner.classList.add("hidden");
+                    submitBtn.disabled = false;
+                    return;
+                }
+                const tasks = [];
+                for (const block of taskBlocks) {
+                    let task_for = block.querySelector("select").value.trim();
+                    if (task_for === "Other") task_for = block.querySelector(".other-input").value.trim();
+                    const task_name = block.querySelectorAll("input,textarea")[1].value.trim();
+                    const task_details = block.querySelectorAll("input,textarea")[2].value.trim();
+                    const my_role = block.querySelectorAll("input,textarea")[3].value.trim();
+
+                    if (!task_for || !task_name || !task_details || !my_role) {
+                        showToast("All fields (*) are mandatory for each task", false);
+                        btnText.classList.remove("hidden");
+                        btnSpinner.classList.add("hidden");
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    tasks.push({ task_for, task_name, task_details, my_role });
+                }
+                payload.tasks = tasks;
+            }
+
+            try {
+                const res = await fetch(apiBase + "/attendance", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    showToast("Error: " + (data.detail || JSON.stringify(data)), false);
+                    btnText.classList.remove("hidden");
+                    btnSpinner.classList.add("hidden");
+                    submitBtn.disabled = false;
+                    return;
+                }
+                showToast("Attendance submitted successfully!");
+                document.getElementById("attForm").reset();
+                document.getElementById("attForm").classList.add("hidden");
+                document.getElementById("checkoutFields").classList.add("hidden");
+                document.getElementById("tasks_container").innerHTML = "";
+                document.getElementById("signin-section").classList.remove("hidden");
+                userEmail = "";
+            } catch (err) {
+                showToast("Error: " + err.message, false);
+            } finally {
                 btnText.classList.remove("hidden");
                 btnSpinner.classList.add("hidden");
                 submitBtn.disabled = false;
-                return;
             }
-            tasks.push({ task_for, task_name, task_details, my_role });
-        }
-        payload.tasks = tasks;
-    }
-
-    try {
-        const res = await fetch(apiBase + "/attendance", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if (!res.ok) {
-            showToast("Error: " + (data.detail || JSON.stringify(data)), false);
-            btnText.classList.remove("hidden");
-            btnSpinner.classList.add("hidden");
-            submitBtn.disabled = false;
-            return;
-        }
-        showToast("Attendance submitted successfully!");
-        document.getElementById("attForm").reset();
-        document.getElementById("attForm").classList.add("hidden");
-        document.getElementById("checkoutFields").classList.add("hidden");
-        document.getElementById("tasks_container").innerHTML = "";
-        document.getElementById("signin-section").classList.remove("hidden");
-        userEmail = "";
-    } catch (err) {
-        showToast("Error: " + err.message, false);
-    } finally {
-        btnText.classList.remove("hidden");
-        btnSpinner.classList.add("hidden");
-        submitBtn.disabled = false;
-    }
-});
-</script>
+    </script>
 </body>
+
 </html>
