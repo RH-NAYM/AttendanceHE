@@ -143,8 +143,39 @@
                     </ul>
                 </div>
 
-                <p style="margin:0;font-size:13px;color:#475569;">Prepared by <strong>Rakib</strong></em></p>
-                <p style="margin:0;font-size:13px;color:#475569;">Effective Date: <em>1st October, 2025</em></p>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                    <div>
+                        <p style="margin:0;font-size:13px;color:#475569;">Prepared by <strong>Rakib</strong></p>
+                        <p style="margin:0;font-size:13px;color:#475569;">Effective Date: <em>1st October, 2025</em></p>
+                    </div>
+                    <button
+                        onclick="window.open('https://docs.google.com/spreadsheets/d/170lkEvbZyU6H7eTiRY-bGDOonHiPuNbsyM4eIjj6_EY/edit?usp=sharing', '_blank');"
+                        style="
+                            padding:12px 26px;
+                            font-size:14px;
+                            font-weight:600;
+                            color:#ffffff;
+                            background:linear-gradient(135deg, #0b978c 0%, #0670ad 100%);
+                            border:none;
+                            border-radius:10px;
+                            cursor:pointer;
+                            transition:
+                                transform 0.25s ease,
+                                box-shadow 0.35s ease,
+                                background 0.35s ease;
+                            box-shadow:
+                                0 4px 12px rgba(11,151,140,0.35),
+                                0 2px 6px rgba(6,112,173,0.25);
+                            letter-spacing:0.5px;
+                            transform:translateY(0);
+                            animation:pulseGlow 2.4s infinite ease-in-out;
+                            backdrop-filter: blur(4px);
+                        "
+        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 18px rgba(11,151,140,0.45)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(11,151,140,0.3)';">
+                        Google Sheet
+                    </button>
+                </div>
             </main>
         </div>
 
