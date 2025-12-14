@@ -368,3 +368,10 @@ button {
             0 0 0 0 rgba(6, 112, 173, 0.10);
     }
 }
+
+
+
+.red_marked,
+.red_marked strong {
+  color: rgb(235, 71, 71);
+}
