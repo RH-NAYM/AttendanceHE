@@ -1,4 +1,4 @@
-📊 Attendance Hybrid System ==>> main Branch
+📊 Attendance Hybrid System ==>> rakib Branch
 https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 https://img.shields.io/badge/Google%2520Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white
 https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white
@@ -150,14 +150,14 @@ javascript
 function updateCompanyDropdown(companies) {
     const companySelect = document.getElementById('company');
     companySelect.innerHTML = '<option value="">Select Company</option>';
-    
+
     companies.forEach(company => {
         const option = document.createElement('option');
         option.value = company;
         option.textContent = company;
         companySelect.appendChild(option);
     });
-    
+
     // Add "Other" option
     const otherOption = document.createElement('option');
     otherOption.value = 'other';
@@ -173,9 +173,9 @@ function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.remove();
     }, 3000);
